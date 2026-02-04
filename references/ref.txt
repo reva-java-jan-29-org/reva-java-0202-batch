@@ -1,0 +1,128 @@
+TERMS:
+---------------
+
+    - POJO - Plain old java object
+        - any ordinary java class can be pojo
+        - it has private members (data members / variables) and public getter/setter methods 
+
+
+    - BO - Business Object 
+        - represents a business entity 
+
+    - SO - Service Object 
+        - used to write the business logic 
+        - classes that represents business logic 
+
+    - DAO - Data Access Object 
+        - logic to connect with the database and perform db related operations 
+
+    - DTO - Data Transfer Object 
+
+    - VO - Value object 
+
+    - Java Beans 
+
+    - Entity 
+
+    - Spring Beans 
+
+
+
+
+
+
+
+public class Student {
+
+}
+
+
+public class Bank {
+
+}
+
+public class BankAccount {
+
+}
+
+public class Employee {
+
+}
+
+Employee employee; 
+
+
+public class Cart {
+
+}
+
+Cart cart;
+
+public class CartService {
+
+}
+
+public class CartDAO {
+
+}
+
+
+
+
+variables
+----------------
+
+    1. local variables 
+
+    2. instance variables 
+
+    3. static variables 
+
+
+non-access modifiers 
+-------------------------
+
+    1. static keyword
+        - static variables 
+            - declared inside a class
+            - has only 1 copy 
+        - static methods 
+            - static methods are accessed without creating object of the class 
+        - static class 
+
+    2. final keyword 
+        - final variable 
+
+        - final method 
+
+        - final class 
+
+
+class InputStream {
+
+}
+
+class System {
+
+    static InputStream in;
+    static OutputStream out;
+}
+
+System.in - "in" is a ref variable of type InputStream, which by default points to the input stream of standard keyboard 
+System.out = "out" 
+
+Scanner scanner = new Scanner(System.in)
+
+git add . 
+
+
+
+git add hello.txt, goodday.txt, goodbye.txt 
+
+git add 
+
+
+java Helloworld data1 data2 data3
+
+
+
