@@ -122,7 +122,51 @@ git add hello.txt, goodday.txt, goodbye.txt
 git add 
 
 
-java Helloworld data1 data2 data3
+Arrays in java
+-------------------
+
+**Array Declaration
+
+    <<datatype>>[] var;  
+
+    int[] arr; 
+
+    short[] arr;  
+
+    byte[] arr; 
+
+    char[] arr; 
+
+    String[] arr;  
+
+    Employee[] arr;  
+
+    Student[] arr;  
+
+
+**Create array / create array object 
+
+        arrVarName = new <datatype>[size];
+
+        arr = new int[5];
+
+
+        int[][] data = new int[2][5];
 
 
 
+    - java.util package provides "Arrays" class which provides various methods to manage/manipulate arrays 
+
+
+    String in java
+    -----------------------
+
+        Create 
+
+            1. using string literals 
+
+                    String str = "Welcome"; 
+
+            2. using constructor (new keyword )
+
+                    String str = new String("Welcome");
