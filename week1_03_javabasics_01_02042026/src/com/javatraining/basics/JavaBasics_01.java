@@ -5,6 +5,10 @@ public class JavaBasics_01 {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		Employee emp;
+		
+		
+		
 		Employee employee1 = new Employee();
 		Employee employee2 = new Employee();
 		

@@ -12,6 +12,8 @@ public class StringDemo {
 		//should start with 7 / 8 / 9
 		
 		
+		String regex = "[a-zA-Z0-9_]{6,30}";
+		
 		boolean result =  mobileNo.matches("[789]\\d{9}");
 		System.out.println(result);
 		

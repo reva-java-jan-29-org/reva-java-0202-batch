@@ -170,3 +170,141 @@ Arrays in java
             2. using constructor (new keyword )
 
                     String str = new String("Welcome");
+
+- Java basics 
+    - variables
+    - data types
+    - flow control 
+    - arrays 
+    - strings 
+    - regex 
+
+- OOPS Concepts 
+-------------------
+    - OOP is a way to model software as "real-world entities" (objects) that: 
+        - have "State" (data) 
+        - have "behavior" (functions / methods)
+        - interact with each other 
+
+
+    - Banking Software 
+        - Customer has data (name, accoutid, balance, KYC details, etc.)
+        - Customer can do actions (open accounts, deposit, withdraw, transfer etc.)
+        - different customer behave similary but have different values (balance differs)
+
+    - OOP lets you represent this in code cleanly. 
+
+
+    Classes and Objects 
+    ----------------------
+        - Class 
+            - a class is a blueprint / template describes 
+                - what data an entity has (fields / variables / properties )
+                - what is can do (methods)
+        - Object 
+            - an object is a real instance created from the class at runtime 
+
+        
+        class BankAccount {
+
+                //fields / members / instance variables 
+                private int accountId;
+                private double balance;
+
+                //methods  / instance methods 
+
+                //static variables 
+
+                //static method 
+
+                //constructor/s 
+
+                //inner class 
+        }
+
+        BankAccount bankAccount = new BankAccount();
+
+
+OOPS Concepts 
+--------------------
+    1. Encapuslation 
+        - bundling data + behavior together and controlling access to internal data 
+        - a properly encapulated class always has 
+            - all members private 
+            - has necessary getters / setter methods 
+
+
+
+    Constructor in java 
+    -------------------------
+
+        - a constructor is a special method-like block executed automatically when you create an object using "new" keyword 
+        - name of the constructor method must match the class name 
+        - no return type 
+        - used to initize the object in a valid state 
+        - construtors also ensure your object  starts life in a valid state 
+
+
+        - Default Constructor (compiler provided)
+            - if your class does not have any contructor, then compiler provides a "default constructor" which intializes the default values to the data memebres 
+
+        - no-arg constructor 
+            - you can define a constructor without any parameters 
+
+        - pameterized constructor 
+            - enforce that the required fields are set at creation time
+
+        - constructor overloading 
+            - multiple constructors with different parameters 
+
+        - valid access modifiers for constructors 
+            - public 
+                - constrcutor can be accessed from anywhere, objects can be created from any package 
+            - protected 
+                - accessible only within the same package 
+                - in subclasses, even in different packages 
+            - private 
+                - accessible within the same class 
+            - default (no modifer is used)
+                - accessible only withing the same package 
+
+
+
+    - Method Overloading (compile time polymorphism)
+    ----------------------------
+        - same method name, different pameter list 
+            - different number of pameters or 
+            - different types or 
+            - different order or types 
+
+        - Java picks the “most specific” match, by matching the pameters between the calling method and declared methods 
+        - this decision is taken during compile time 
+
+
+        When does the static binding happens?
+            - when the method call is resolved at compile time it is called "Static binding"
+            - static methods 
+            - final methods - always bound at compile time 
+            - private methods - compiler binds private methods at compile time
+            - method overloading - depends on parameters / parameter types, it is decided at compile time 
+
+
+            class Parent {
+                static void show(){
+                    sysout("Parent");
+                }
+            }
+
+            class Child extends Parent {
+                static void show(){
+                    sysout("Child");
+                }
+            }
+
+            Parent p = new Child();
+            p.show();       //it will call parent class show() 
+                            //because method is static it is not overridden, 
+                            and the method call is resolved by reference type
+
+    ***NOTE: in java, a parent class variable can reference to a child object 
+    ***NOTE: in java, an interface variable can reference to an object of it's implementation class
