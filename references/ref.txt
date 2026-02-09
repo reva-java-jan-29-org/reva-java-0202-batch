@@ -268,8 +268,6 @@ OOPS Concepts
             - default (no modifer is used)
                 - accessible only withing the same package 
 
-
-
     - Method Overloading (compile time polymorphism)
     ----------------------------
         - same method name, different pameter list 
@@ -279,7 +277,6 @@ OOPS Concepts
 
         - Java picks the “most specific” match, by matching the pameters between the calling method and declared methods 
         - this decision is taken during compile time 
-
 
         When does the static binding happens?
             - when the method call is resolved at compile time it is called "Static binding"
@@ -308,3 +305,363 @@ OOPS Concepts
 
     ***NOTE: in java, a parent class variable can reference to a child object 
     ***NOTE: in java, an interface variable can reference to an object of it's implementation class
+
+
+Inheritance 
+---------------------
+    - mechanism where a class (subclass/childclass) acquires the properties and behavior of 
+        another class (parentclass/superclass)
+    
+    why inheritance:
+    - reusability (code reuse)
+    - local hierarchy modeling
+    - enalble runtime polymorphism
+    - reduces duplication
+
+    - inheritance represents IS-A relationship between super class and sub class 
+    - in java, we use 'extends' keyword to inherit class 
+
+        public class Child extends Parent {
+
+        }
+
+    - java supports "Single Inheritance" for classes 
+    - Child class can :
+        - inherit all non-private members (variables and methods)
+        - override super class methods
+        - additional members
+    - constructors are not inherited, but the parent class constructor can be invoked 
+        through "super()"   
+    - by default, child class constructor always invoks superclass's no-arg constructor (if the super() is not used)
+
+BankAccount
+ - customerId
+ - name
+ - address
+ - openAccount()               
+      |
+      |
+---------------------------------------------------------------
+SavingAccount           CurrentAccount              LoanAccount
+   |
+   |
+   |
+PremiumSavingAccount
+SalarySavingAccount
+EliteSavingAccount
+
+SavingAccount IS-A BankAccount 
+PremiumSavingAccount IS-A SavingAccount
+PremiumSavingAccount IS-A BankAccount 
+
+
+Object class 
+-------------
+    - Object class is the "root" class for all the classes in java 
+    - object class is the super most / top most class in java 
+    - this Object class provides some common methods that every java object must have   
+        - public boolean equals(Object obj) - allow to implement a way to prove equality 
+        - public int hashCode() - to represent an identity
+        - public String toString()  - allows to implement a way to describe the object 
+        - public void finalize()
+        - public void wait()
+        - public void notify()
+        - public void notifyAll()
+
+
+    public class A {
+        public boolean equals(Object obj){}
+        public int hashCode(){}
+        public String toString() {}
+    }
+
+    public class Student {
+
+            public boolean equals(Object obj){}
+            public int hashCode(){}
+            public String toString() {}
+    }
+
+    public class Teacher {
+            public boolean equals(Object obj){}
+            public int hashCode(){}
+            public String toString() {}
+    }
+
+    public class Engineer {
+            public boolean equals(Object obj){}
+            public int hashCode(){}
+            public String toString() {}
+    }
+
+    public class Doctor {
+            public boolean equals(Object obj){}
+            public int hashCode(){}
+            public String toString() {}
+    }
+
+
+
+    Object obj = new Student();
+
+    Object obj = new Doctor()
+    
+
+
+    Real-life example using Inheritance 
+    ---------------------------------------
+        - e-commerce order fullfillment system
+        - a company that ships different kind of "orders"
+
+
+        Common to all ordres 
+        ----------------------
+            - orderId
+            - customerInfo
+            - items and base price
+            - taxCalculation
+            - discount handling 
+            - final payable amount
+            - status (PLACED -> PAID -> PACKED -> SHIPPING -> DELIVERED)
+
+        Types of Orders:
+            1. DigitalOrders 
+                    - no shipping 
+                    - instance delivery via download link / email 
+                    - tax rules may differ 
+            2. PhysicalOrders 
+                    - requires packaging, shipping, courier tracking 
+            3. FragileOrders
+                    - extra packaging charges 
+                    - courier requires "fragile handling" service 
+            4. InternationalOrders
+                    - custom duties + extra compliance 
+                    - tax rules different 
+            5. SubscriptionOrders 
+                    - recurring billing cycles
+                    - prorated discount, recurring shippments 
+
+            Order (orderId, customerEmail, address, items[], baseAmount, discount, status)
+                |-DigitalOrder
+                |-PhysicalOrder (shippingAddress, courierPartner)
+                    |-FragileOrder
+                    |-InternationalOrder
+                    |-SubscriptionOrder
+
+
+
+    Enum in Java
+    -====================
+        - enum (Enumeration) is a special data type used to defined "fixed set of named constants"
+        - enum constants are objects 
+        - enum implicitely extends from java.lang.Enum 
+        - enum can have fields, constructors, methods 
+        - enum instances are sigleton 
+
+        enum Day {
+            MONDAY, TUESDAY, WEDNESDAY
+        } 
+
+
+        class Day extends Enum<Day>{
+            public static final Day MONDAY = new Day();
+            public static final Day TUESDAY = new Day();
+            public static final Day WEDNESDAY = new Day();
+
+        }
+
+
+Why java doesn't support multiple inheritance 
+-----------------------------------------
+    - avoid ambiguity in method resolution, data conflicts, constructor intitialization issues 
+    - avoid commonly known diamond problem 
+    --**Java supports multiple inheritance through interfaces - ensures clarity, type safety and predicatable runtime behavior 
+
+
+
+
+Abstract classes 
+------------------------
+    - an abstract class in java is a class that cannot be instantiated and it is designed to be 
+        extended by subclasses / designed to act only as a superclass containing common variables / methods
+
+    - an abstract class contains    
+        - abstract methods 
+        - concrete methods 
+        - fields / data members / variables / instance variables 
+        - constructors 
+
+
+
+
+    abstract class Car {
+
+        public abstract void move();
+    }
+
+    class TataCar extends Car {
+
+        @Override 
+        public void move(){
+            sysout("This car moves smooth");
+        }
+    }
+
+    class BMWCar extends Car {
+
+        @Override 
+        public void move(){
+            sysout("This car moves fast");
+        }
+    }
+
+    class MercedesCar extends Car {
+       
+        @Override 
+        public void move(){
+            sysout("This car moves fast as well smooth");
+        }
+    }
+
+    Car car1 = new TataCar();
+    car1.move();
+
+
+    Car car2 = new BMWCar();
+    car2.move();
+
+
+
+    Abstract methods
+    -----------------------
+        - abstract methods are declared without body 
+        - abstract methods must be overridden in the immediate subclass 
+      
+
+
+    Intefaces in java 
+    ---------------------------
+        - an interface in java is a "pure contract" that defines what a class "Can do"
+        - an interface defines set of requirements that a class has to implement
+
+        - a class can use "implments" keyword to implement an interface 
+        - a class that implements an interface must override all the abstract methods 
+
+        - a class can implement several interfaces 
+        - an interface can extend several interfaces 
+
+        - (java 7) interface contains only "abstract" methods  
+        - (java 8) - enhanced interface concepts in java 8
+
+            - interface can contain concrete "public" and "static" methods as well 
+
+        - (java 9) - interface can contain "private" methods 
+
+            
+            **Functional Interface (Java 8)
+                - an interface that contains exactly 1 abstract method is called "Functional Interface" 
+
+                    interface A {
+                        public abstract void someMethod();
+                    }
+
+            ** Functional Interface provided by Java 
+
+                    supplier 
+                    consumer 
+                    function
+
+
+
+
+    public interface Taxable {
+
+        public abstract double calculateTax();
+    }
+
+    public interface GiftPackaged {
+
+        public abstract void giftPackage();
+    }
+
+
+    public ElectronicProducts extends Product implements Taxable, GiftPackaged {
+
+        @override 
+        public double calculateTax(){
+
+        }
+    }
+
+
+
+    interface Singer {
+
+        void sing();
+    }
+
+    interface Dancer {
+
+        void dance()
+    }
+
+    interface TalentedStudent extends Singer, Dancer {
+
+    }
+
+
+    class Student implements Singer, Dancer {
+
+
+            //override all the abstract methods 
+
+    }
+
+
+
+
+
+    Abstract classs                                          interface 
+
+    may / may not have abstract methods                 has only abstract method 
+
+    "What" is the object?                               "What Can" the object do?
+
+    share common state + behavior                       pure abstract / pure contracts
+                                                        defines set of requirements that a class must implement 
+
+    can have                                            can have 
+        - static members                                    - constants (static final variables )
+        - instance members                                  - abstract methods 
+        - constructors                                      - public members 
+        - concrete methods                                  - (java 8) - concrete "public" and "static" methods
+        - may have abstract mehtods 
+        - private, protected, public members                - (java 9) - allows concrete "private" methods 
+        - final methods 
+
+
+    abstract classes represent real objects             interface represents "capabilities" / "requirements", not objects 
+
+    a class can extends from only 1 class               a class can implement multiple interfaces 
+
+
+
+
+    **Why interfaces are called "pure contracts" 
+
+        - a contract is "formal promise" between two parties 
+            - provider : promises certain behavior 
+            - consumer : relies on that promise without knowing implementation details 
+
+        - in software terms: a contract defines "What must be done" 
+
+        - an interface defines a contract, that a class must implement some requirements 
+
+        public interface Taxable {
+
+            void calculateTax();
+        }
+
+
+
+
