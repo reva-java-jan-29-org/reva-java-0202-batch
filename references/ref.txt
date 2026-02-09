@@ -664,4 +664,131 @@ Abstract classes
 
 
 
+    Method Overriding 
+    -----------------------
+        - is an OOP feature in which a subclass provides its own implementation of a method already defined in the parent class, 
+            using same method signature
+
+        - Why override 
+            - to implement polymorphism
+            - to provide child specific behavior of the super class method 
+            - to implement loose coupling 
+
+        - How to override methods 
+            - redefining a superclass method in the subclass with the same method signature 
+
+        - Rules for method overriding 
+
+            #1 - only inherited methods are overridden 
+                    - default, public and protected methods of superclass can be overridden 
+                    - private methods cannot be overridden 
+            #2 - final and static methods cannot be overridden
+
+            #3 - in subclass, the overridden method must have same method signature as per super class 
+
+            #4 - the overriding method must have same return type or subtype 
+
+                public class A {
+                    public Shape show(){
+
+                    }
+                }
+
+                public class B extends A {
+                    public Rectangle shows() {
+
+                    }
+                }
+            #5 - the overriding method must not have more restrictive access modifier 
+
+                public class A {
+                    protected void show(){
+
+                    }
+                }
+
+                public class B extends A {
+                    public/protected void shows() {
+
+                    }
+                }
+
+            #6 - the overriding method must not throw new or broder exceptions 
+
+                public class A {
+                    public void show() throws Exception {
+
+                    }
+                }
+
+                public class B extends A {
+                    public void shows() throws Exception {
+
+                    }
+                }
+
+
+    ***IMP : Overriding toString() method 
+                - String toString() belongs to the java.lang.Object class 
+                - it is used to return string representation of the object 
+
+                - we can override the toString() method in anyclass to return a string 
+                    representing some meaningful info of the object 
+                    - printing object 
+                    - debugging 
+
+                - if you DON'T override the toString()
+                    - the default Object.toString() is inherited 
+                    - by default it returns "ClassName"@"hexHashCode"
+
+
+    ***: Overriding the equals(Object obj) method
+            - equals() is a method defined in java.lang.Object that is used to compare two objects for logical equality.
+
+            public boolean equals(Object obj)
+
+            - we can override the equals() method to define logic to compare two objects 
+
+            - if we DON'T override 
+                - the default Object.equals() is inherited 
+                - by default, it compare the references of the given variables, not the contents 
+
+            **equals() contract in java 
+            -------------------------------
+                - is a set of rules defined by java that every correct implemetation of equals method must follow 
+
+                    Rule #1 - reflexive - An object must always be equal to itself.
+
+                                x.equals(x) - should return true 
+
+                    Rule #2 - Symmetric - Equality must work both ways.
+                    
+                        -  If x equals y, then y must equal x.
+
+                         x.equals(y) == y.equals(x)
+
+                    Rule #3 - Transitive - equality must be consistent 
+
+                                x, y, z
+                    
+                    #Rule #4 - Consistent - equality should not randomly change 
+
+                    Rule #5 - non-null references - no object is equal to null
+
+
+    Wrapper Classes 
+    -------------------------
+
+        byte                        Byte
+        short                       Short 
+        int                         Integer
+        long                        Long 
+        float                       Float 
+        double                      Double 
+        char                        Character
+        boolean                     Boolean 
+
+
+    Collection Framework 
+    ----------------------------
 
