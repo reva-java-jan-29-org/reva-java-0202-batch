@@ -845,7 +845,7 @@ Abstract classes
         |-E	remove(int index)                   |                                       |
     ArrayList<T>                            HashSet<T>                          --------------------------------------------------------
     LinkedList<T>                           LinkedHashSet<T>                    LinkedList<T>   interface Deque<T>      interface BlockingQueue<T>
-    Vector<T>                               TreeSet<T>                                                       |                       |
+    Vector<T>                               TreeSet<T>                          PriorityQueue<T>             |                       |
     Stack<T>                                                                                          ArrayDeque<T>                  |-ArrayBlockingQueue<T>
                                                                                                                 interface BlockingDeque<T>
                                                                                                                                     |
@@ -894,7 +894,7 @@ interface List<T> implementation classes
 
     - ArrayList<T>
             - ArrayList internally uses "resizable array" data structure 
-            - the default capacity is 10
+            - the default initial capacity is 10
             - as soon as we add additional element than the capacity of the arraylist, it automatically grows (50%)
 
     - LinkedList<T>
@@ -905,11 +905,17 @@ interface List<T> implementation classes
 
     - Vector<T>
             - internally uses "resizable array" data structure
-            - thread-safe 
+            - synchronized, thread-safe 
+            - the default initial capacity is 10
 
     - Stack<T>
             - internally uses "resizable array" data structure
             - supports LIFO approach 
+            - additional methods to perfom insertion / removal in LIFO approach
+
+                        - push(E) - insert element            
+                        - pop() - remove top element 
+                        - peek()   - view the top element 
 
 
     **: How to create a List 
@@ -921,17 +927,131 @@ interface List<T> implementation classes
             List<Integer> listNumbers = new ArrayList<>(); 
 
 
+    **add elements in the list 
+
+        add(E e)
+        add(int index, E e)
+        addAll(Collection col)
+        addAll(int index, Collection col)
 
 
+    ** remove an element from a List 
+
+        T remove(int index)
+            - removes an element based on given index number 
+
+        boolean remove(Object obj)
+            - it compares the given obj with all the elements in the List (using it's equals() method), if found it removes the given object 
+            
+    **Search an element from list 
+
+        boolean contains(Object obj)
+            - it compares the given obj with all the elements in the List (using it's equals() method), if found it returns true 
+        
+        int indexOf(Object obj)
+            - returns index of the given element if found, otherwise returns -1
+
+
+        
 
 
 interface Set<T> implemetation classes 
 
+    - set is a collection that "does not" allow duplicate elements 
+    - no duplicates 
+    - allow one null
+
     - HashSet<T>
+        - unordered, it doesnt guarantee the order of insertion 
+        - uses "hashtable" data structure 
 
     - LinkedHashSet<T>
+        - maintains order of insertion 
+        -  uses "hashtable + double linked list" data structure 
 
     - TreeSet<T>
+        - maintains sorted order of elements 
+        - uses "balanced tree" data structure 
+
+
+
+    **What is hashCode 
+        - hashCode() defined in the Object class, returns an integer hash value representing an object 
+        - this hashCode value is primarily used in collections (set) to store/retrieve the elements efficiently 
+        - **by default, the hashCode() method returns an integer value derived from the memory address of the object 
+
+    **how set collections ensure uniqueness
+        - first, it uses the hashCode() method, which returns an integer hash value, this value is used to find the "bucket index"
+        - once the bucket index is calcualted, then it will check the bucket if there any similar object exists 
+        - it uses the 'equals()' method to check equality  
+
+    **for any Set based collections, you must override both hashCode() and equals() method 
+
+    ** hashCode() and equals() contract 
+        - hashCode() ---> decide "Where" to look (bucket)
+        - equals() -----> decide whether the object are unique or not 
+
+        - if two objects are exactly same, then their hashCode must also be same 
+        - two unequal objects may have same hashCode
+
+
+
+    **Collections class java.util package 
+        - provides several utility methods 
+
+
+        Collections.sort()  - used to sort the given collection 
+
+
+    **Sorting 
+        - the elements are sorted based on their "natural ordering"
+
+        - integer values - ascending order 
+        - string values - alphabetically ascending order 
+        - dates values - lexicographically ascending 
+
+
+    **interface Comparable<T> 
+        - Comparable interface defins a class's natural ordering by implementing compareTo() method 
+
+
+        interface Comparable<T>{
+            int compareTo(T o);
+        }
+
+        - the compareTo() method returns 'int' value represents a "compare value" 
+
+            compare value  1        : the current object is greater than the given object 
+                          - 1       : the current object is less than given object 
+                          0         : both objects are same 
+
+
+        public class Employee implement Comparable {
+
+                public int compareTo(Object obj){
+
+                }
+        }
+
+
+        public class Employee implement Comparable<Employee> {
+                @Override 
+                public int compareTo(Employee other){
+                    
+                }
+        }
+
+
+        **interface Comparator<T>
+            - Comparator interface is used to create multiple external comparators to define natural ordering of objects 
+
+
+                inteface Comparator<T>{
+                    int compare(T o1, T o2);
+                }
+
+
+
 
 interface Queue<T> implemetation classes 
 
