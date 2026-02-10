@@ -441,12 +441,37 @@ Object class
                     - recurring billing cycles
                     - prorated discount, recurring shippments 
 
+
+        **--some ordres "can do" extra things, but not all 
+
+              - some orders are Trackable
+              - some orders are Refundable (refund())
+              - some orders are Insurable 
+              - some orders are giftWrappable (giftPackage())
+
+            Interfaces 
+                - Trackable
+                - Refundable
+                - Insurable
+
             Order (orderId, customerEmail, address, items[], baseAmount, discount, status)
                 |-DigitalOrder
                 |-PhysicalOrder (shippingAddress, courierPartner)
-                    |-FragileOrder
-                    |-InternationalOrder
+                    |-FragileOrder. (implement Insurable interface)
+                    |-InternationalOrder (impment Trackable + Insurable)
                     |-SubscriptionOrder
+
+
+
+        Inheritance friendly design                     Interface Friendly Design 
+
+        wherever some common "members"                  wherever some capabilities needs to be defined 
+        are supposed to be inherited                    and may be implemented differently on each child class 
+
+
+
+
+
 
 
 
@@ -791,4 +816,126 @@ Abstract classes
 
     Collection Framework 
     ----------------------------
+
+        - java.util package provides several classes, interfaces to help us create group of objects 
+        - Collection framework provies interfaces, implementations, and algorithms to store, manipulate, and 
+                process group of objects 
+        - with collection framework you can create dynamic collection of objects 
+        - the classes in collection framework provides dynamic data structures 
+        - ***NOTE: we cannot store primitive values in the collection
+
+        - Hierarchy of collection framework 
+
+
+                    interface Iterable<T>
+                            |-> Iterator<E>	iterator()
+                            |
+                    interface Collection<T>
+                            |
+                            |-> boolean	add(E e)
+                            |-> boolean	addAll(Collection<? extends E> c)
+                            |-> void clear()
+                            |-> boolean	contains(Object o)
+                            |-> boolean	remove(Object o)
+                            |-> boolean	isEmpty()
+                            |
+    ------------------------------------------------------------------------------------
+    interface List<T>                       interface Set<T>                        interface Queue<T>
+        |-void	add(int index, E element)       |                                       |
+        |-E	remove(int index)                   |                                       |
+    ArrayList<T>                            HashSet<T>                          --------------------------------------------------------
+    LinkedList<T>                           LinkedHashSet<T>                    LinkedList<T>   interface Deque<T>      interface BlockingQueue<T>
+    Vector<T>                               TreeSet<T>                                                       |                       |
+    Stack<T>                                                                                          ArrayDeque<T>                  |-ArrayBlockingQueue<T>
+                                                                                                                interface BlockingDeque<T>
+                                                                                                                                    |
+                                                                                                                         ArrayBlockingDeque<T>       
+
+
+
+            interface Map<K,V>
+                |
+                |
+            HashTable<K,V>
+            HashMap<K,V>
+            LinkedHashMap<K,V>
+            TreeMap<K,V>
+
+
+
+
+Interface Collection<T>
+    - is the supermost interface in the hierarchy 
+    - defines common methods to be implemnted by all the subinterfaces and classes 
+
+
+interface List<T>  
+    - is a sub interface of Collection interface, it models an indexed collection of objects, allows duplicate 
+
+
+interface Set<T> 
+    - is a sub interface of Collection interface, it models unique collection of objects, doesn't allow duplicates  
+
+
+interface Queue<T>
+    - is a sub interface of Collection interface, it model FIFO based collection of objects, 
+
+
+interface Map<K,V>
+    - models a collection of objects stored using key-value pairs 
+
+
+interface List<T> implementation classes 
+
+        **: maintains insertion order 
+        **: allows duplicates 
+        **: allows null 
+        **: index-based access 
+
+    - ArrayList<T>
+            - ArrayList internally uses "resizable array" data structure 
+            - the default capacity is 10
+            - as soon as we add additional element than the capacity of the arraylist, it automatically grows (50%)
+
+    - LinkedList<T>
+
+            - LinkedList internally uses "Double Linked List" data structure 
+            - supports linear data structure, that stores the elements in the form of "nodes", where each node contains 
+                    - data, a ref to the prev node and a ref to the next node 
+
+    - Vector<T>
+            - internally uses "resizable array" data structure
+            - thread-safe 
+
+    - Stack<T>
+            - internally uses "resizable array" data structure
+            - supports LIFO approach 
+
+
+    **: How to create a List 
+
+            ArrayList list = new ArrayList();       //non-generic list 
+
+            ArrayList<Integer> listNumbers = new ArrayList<>();     //generic list 
+
+            List<Integer> listNumbers = new ArrayList<>(); 
+
+
+
+
+
+
+interface Set<T> implemetation classes 
+
+    - HashSet<T>
+
+    - LinkedHashSet<T>
+
+    - TreeSet<T>
+
+interface Queue<T> implemetation classes 
+
+
+
+
 

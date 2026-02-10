@@ -19,6 +19,9 @@ public class EmployeeTest {
 //		}
 
 		
+		employee1.equals(employee1);
+		
+		
 		if(employee1.equals(employee2)) {
 			System.out.println("Both are equal");
 		}else {
