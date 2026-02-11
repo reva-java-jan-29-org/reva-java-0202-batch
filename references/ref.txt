@@ -469,12 +469,6 @@ Object class
         are supposed to be inherited                    and may be implemented differently on each child class 
 
 
-
-
-
-
-
-
     Enum in Java
     -====================
         - enum (Enumeration) is a special data type used to defined "fixed set of named constants"
@@ -503,8 +497,6 @@ Why java doesn't support multiple inheritance
     --**Java supports multiple inheritance through interfaces - ensures clarity, type safety and predicatable runtime behavior 
 
 
-
-
 Abstract classes 
 ------------------------
     - an abstract class in java is a class that cannot be instantiated and it is designed to be 
@@ -515,9 +507,6 @@ Abstract classes
         - concrete methods 
         - fields / data members / variables / instance variables 
         - constructors 
-
-
-
 
     abstract class Car {
 
@@ -1057,5 +1046,58 @@ interface Queue<T> implemetation classes
 
 
 
+interface Map<K,V>
+    - models a collection of objects stored using key-value pairs 
+    - "key" should be unique 
+    - each "key" maps to one value 
+    - maps use equals() to ensure the "keys" are unique 
+
+    - Implementation classes of Map<K,V> interface 
+
+        - HashTable <K,V>
+            - does not allow null keys 
+            - no ordering 
+            - internal data structure - hashtable 
+            - thread-safe
+
+        - HashMap<K,V>
+            - no ordering 
+            - does not maintain order of insertions 
+            - allows one null key 
+            - internal data structure - hashtable 
+                    - before java 7, it uses linked node list 
+                    - java 8 - it uses "red-black" tree 
+
+        - ConcurrentHashMap
+            - thread-safe
+
+        - LinkedHashMap<K,V>
+            - does not allow null key 
+            - maintains order of insersion by keys 
+            - hashmap + double linked list 
 
 
+        - TreeMap<K,V>
+            - does not allow null key 
+            - maintains sorted order of keys 
+            - red-black tree data structure 
+
+
+        **add an entry to the map 
+
+                .put(K, V);
+
+
+        ** get value 
+
+                .get(K) 
+
+        ** 3 ways to iterate over maps 
+
+                1. Collection<V> values() method 
+                    - returns a collection containing all the values of the map 
+
+                2. Set<K> keySet()
+                    - returns a set containing all the keys 
+
+                3. entrySet()

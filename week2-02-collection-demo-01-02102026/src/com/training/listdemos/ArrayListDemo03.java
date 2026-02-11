@@ -2,6 +2,7 @@ package com.training.listdemos;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 public class ArrayListDemo03 {
@@ -28,7 +29,16 @@ public class ArrayListDemo03 {
 		
 		employeeList.remove(employee);
 		
-		System.out.println(employeeList);
+		//System.out.println(employeeList);
+		
+		Iterator<Employee> iteratror =  employeeList.iterator();
+		
+		while(iteratror.hasNext()) {
+			Employee emp =	iteratror.next();
+			System.out.println(emp);
+		}
+		
+		
 	}
 
 }
