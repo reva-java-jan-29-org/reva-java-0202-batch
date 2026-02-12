@@ -1101,3 +1101,238 @@ interface Map<K,V>
                     - returns a set containing all the keys 
 
                 3. entrySet()
+
+
+interface Queue<T>
+    - it models a FIFO based collection of objects, it is used for processing elements in FIFO order 
+
+
+    Queue Interface Methods 
+        add(e)          offer(e)     
+        remove()        poll()       
+        element()       peek()
+
+    Deque interface methods 
+        addFirst()      offerFirst()
+        addLast()       offerLast()
+        removeFirst()   pollFirst()
+        removeLast()    pollLast()
+
+        peekFirst()
+        peekLast()
+
+    BlockingQueue<E>
+        put()           take()
+
+
+
+    Implementation Classes of Queue<E> interface 
+
+        - ArrayDeque<E> 
+
+        - LinkedList<E>
+
+        - PriorityQueue<E>
+            - not FIFO
+            - sorted by priority (when we remove, the highest priority element (smallest) is removed first)
+
+        - PriorityBlockingQueue<E>
+
+        - LinkedBlockingQueue<E>
+
+        - ArrayBlockingQueue<E>
+            - this models a capacitity based queue 
+
+        - ArrayBlockingDqueue<E>
+
+
+    **Concurrent Collection 
+    ------------------------------
+        - CopyOnWriteArrayList 
+        - CopyOnWriteArraySet 
+        - ConcurrentHashMap 
+        - ArrayBlockingQueue
+        - ArrayBlockingDeque
+        - HashTable 
+        - PriorityBlockingQueue
+        - LinkedBlockingQueue
+        - ConcurrentLinkedQueue 
+
+    Exception Handling 
+    ----------------------------
+        - An Exception is an event that disrupts the normal flow of the program 
+        - by default, if the exception is not handled, jvm stops the execution of the program immediately, 
+            prints the exception details, terminates the program 
+
+        - separate error handling logic from business logic 
+        - show appropriate messages to the user, log the error, maintan program flow 
+
+                        Throwable
+                            |
+                   ----------------------------------------------------------------
+                   Error                                                    Exception
+                      |                                                         |
+                OutOfMemoryError                    -----------------------------------------------------------------------------
+                StackOverflowError                  RuntimeException        IOException     SQLException        FileNotFoundException
+                                                        |
+                                                    InputMismatchException
+                                                    ArithmeticException
+                                                    ArrayIndexOutofBoundsException
+                                                    NullPointerException
+                                                    IllegalArgumentExceptions
+      
+        Checked Exceptions 
+            - must be handled in the code, or delcared to be thrown
+
+
+        Unchecked Exceptions 
+            - all the RuntimeExceptions are unchecked exceptions 
+            - if not handled by try/catch then jvm handles it by default 
+      
+      
+      
+      
+        - how to handle the exceptions 
+
+            try {
+                
+                //code to be monitored 
+                //code that might throw exception
+
+            }catch(ArithmeticException ex){
+
+                //log the exception details 
+                //take corrective actions 
+
+            }catch(NullPointerException ex){
+
+            }catch(InputMismatchException ex){
+
+            }finally{
+                //always executes 
+            }      
+
+        - throw keyboard
+
+
+        - throws keyword 
+
+
+        - Exception Propagation
+
+
+
+    JDBC  - java database connectivity 
+    ----------------------------------------
+        - API Specification / standard that every db vendor has to follow 
+        - DB vendors implement the JDBC Specification and provide "Drivers"
+
+
+        java.sql pacakge 
+
+        Connection 
+            - the connection object represents the DB Connection 
+
+        java.sql.Driver 
+            - this is interface that defines some methods that the "Driver" class has to implement 
+            - the Driver object is responsible to communicate with the DB using "Connection"
+
+        Statement 
+            - represents the sql command you want to send to the db 
+
+        ResultSet 
+            - represents the data retrieved from the db through SELECT commands
+            - ResultSet object has a "cursor" which by default points to the row before first row 
+            - 
+            -->
+                '101', 'Mayuri', 'Yavatmal', '20000'
+                '102', 'Rachita', 'Jalgaon', '20000'
+                '103', 'Rutuja', 'Pune', '50000'
+                '104', 'Samiksha', 'Nagpur', '20000'
+
+
+
+
+    steps to communicate with the db 
+    -------------------------------------
+
+        1. load the DB drivers 
+
+            DB          DRIVER CLASS NAME                               URL FORMAT 
+
+            mysql       com.mysql.cj.jdbc.Driver                        jdbc:mysql://<host>:3306/db_name
+
+
+            oracle      oracle.jdbc.driver.OracleDriver                 jdbc:oracle:thin:[<user>/<password>]@<host>[:<port>]:<SID>
+
+            sql server  com.microsoft.sqlserver.jdbc.SQLServerDriver    jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
+
+
+            postgresql  org.postgresql.Driver
+
+            h2          ??
+
+
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+
+        2. Create connection with the db 
+
+			Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/revadb","root","Root123");
+
+        3. create "statement" object 
+
+                    Statement statement = connection.createStatement();
+
+
+               interface Statement 
+                    |
+                    |-> int executeUpdate(String sql) 
+                    |-> ResultSet executeQuery(String sql) 
+                    |-> boolean execute(String sql)
+                    |
+                interface PreparedStatement 
+                    |
+                    |-> int executeUpdate() 
+                    |-> ResultSet executeQuery()
+                    |-> boolean execute()
+                    | 
+                interface CallableStatement 
+                    |
+                    |
+                    |-> boolean execute()
+
+            4. execute the sql command 
+
+                String insertCommand = "INSERT INTO Employee VALUES('Mayuri', 'Yavatmal', 20000.00)";
+
+                statement.executeUpdate(insertCommand); 
+
+
+                    - int executeUpdate(String sql)
+                        - INSERT, UPDATE OR DELETE SQL Commands
+                        - it returns an 'int' value representing the number of row affected 
+
+                    - ResultSet executeQuery(String sql) 
+                        - SELECT SQL commands 
+                        - it returns ResultSet object, representing the table of data fetch by select command 
+
+                    - boolean execute(String sql)
+                        - used to execute any sql command 
+
+                5. Close the connection 
+
+                        connection.close();
+
+
+
+
+            **PreparedStatement Object 
+
+                - it represents pre-compiled query 
+                - represents parameterized query and the values can be supplied to the parameters using setter methods 
+                - we can execute sql commands with binary data as well 
+
+
+        Statement                                   PreparedStatement
