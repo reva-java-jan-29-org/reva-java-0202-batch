@@ -18,7 +18,6 @@ public class JDBCDemo01_InsertRecord {
 			//1.load the driver class 
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			
-			
 			//2.create the connection 
 			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/revadb","root","Root123");
 			
@@ -60,3 +59,41 @@ public class JDBCDemo01_InsertRecord {
 	}
 
 }
+
+
+/*
+ * 		try(connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/revadb","root","Root123");) {
+			
+			//1.load the driver class 
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			
+			//2.create the connection 
+			
+			
+			
+			//3. create statement object 
+			
+			statement = connection.createStatement();
+			
+			Employee employee = new Employee(103, "Rutuja", "Satara", 30000);
+	
+			//4. execute the sql command 
+            String insertCommand = "INSERT INTO Employee VALUES("+employee.getId()+", '"+employee.getName()+"', '"+employee.getCity()+"', "+employee.getSalary()+")";
+
+			int rows = statement.executeUpdate(insertCommand);
+			
+			if(rows > 0)
+				System.out.println("Employee Record inserted");
+			else 
+				System.out.println("Failed to insert employee record");
+			
+			
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+ * 
+ */

@@ -1243,8 +1243,11 @@ interface Queue<T>
         ResultSet 
             - represents the data retrieved from the db through SELECT commands
             - ResultSet object has a "cursor" which by default points to the row before first row 
-            - 
-            -->
+
+            - .next() advances the cursor to the next row 
+            - resultSet object provides several getXXXX() methods , which are used to retrive data from the row
+           
+             -->
                 '101', 'Mayuri', 'Yavatmal', '20000'
                 '102', 'Rachita', 'Jalgaon', '20000'
                 '103', 'Rutuja', 'Pune', '50000'
@@ -1336,3 +1339,22 @@ interface Queue<T>
 
 
         Statement                                   PreparedStatement
+
+
+
+
+com.training.employeemgmt
+  ├─ model
+  │   └─ Employee.java
+  ├─ dao
+  │   ├─ EmployeeDao.java
+  │   ├─ JdbcEmployeeDaoImpl.java
+  │   └─ DaoException.java
+  ├─ service
+  │   ├─ EmployeeService.java
+  |   |- EmployeeServiceImpl.java
+  │   ├─ ValidationException.java
+  │   └─ NotFoundException.java
+  ├─ db
+  │   └─ DbConnectionFactory.java
+  └─ Main.java
