@@ -124,7 +124,7 @@ public final class Employee {
 
 	@Override
 	public String toString() {
-		return "Employee{id=" + id + ", empCode='" + empCode + "', fullName='" + fullName + "', email='" + email
+		return "\n Employee{id=" + id + ", empCode='" + empCode + "', fullName='" + fullName + "', email='" + email
 				+ "', department='" + department + "', salary=" + salary + "}";
 	}
 }

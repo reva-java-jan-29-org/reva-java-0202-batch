@@ -1358,3 +1358,240 @@ com.training.employeemgmt
   ├─ db
   │   └─ DbConnectionFactory.java
   └─ Main.java
+
+
+
+   
+
+
+
+//define interface 
+interface Taxable {
+
+    public boolean isTaxable(int amount); 
+
+}
+
+//implement the interface by creating a new class 
+class Product implements Taxable {
+
+    public boolean isTaxable(int amount){
+        if(amount >= 100)
+            return true;
+        else
+            return false;
+    }
+}
+
+Taxable product = new Product();
+product.isTaxable(100);
+
+
+
+//annoymous object 
+Taxable product = new Taxable(){
+    
+    public boolean isTaxable(int amount){
+        if(amount >= 100)
+            return true;
+        else
+            return false;
+    }
+};
+
+
+//lambda expression
+Taxable product = (int amount) -> {
+        if(amount >= 100)
+            return true;
+        else
+            return false;
+};
+
+
+Functional Interface 
+    - An interface that contains only 1 abstract method is called Functional interface 
+        - optionally, it can have any number of "public" or "static" methods 
+
+        @FunctionalInterface
+        interface Taxalbe {
+            public abstract void show();
+        }
+
+
+     - interface Comparator<T> {
+         int compare(T t1, T t2);
+      }   
+
+      
+
+    - In-built functional interfaces 
+
+        interface Comparable<T>{
+            int compareTo(T t);
+        }
+
+        interface Comparator<T>{
+            int compare(T t1, T t2);
+        }
+
+        interface Runnable{
+            void run();
+        }
+
+
+    **Predicate<T> interface 
+    ----------------------------------
+        - predicate interface contains one method, that receives a parameter of Type T, and returns boolean
+
+            interface Predicate<T>{
+                boolean test(T t);
+            }
+
+            Predicate<Interger> predicate1 = new Predicate(){
+                public  boolean test(Integer value){
+                    return value % 2 == 0;
+                }
+            }
+
+            Predicate<Interger> predicate1 = value -> value % 2 == 0;
+            
+    **Consumer<T> interface 
+    -------------------------------
+            - consumer interface has one method i.e. accept() that receives a parameter of type T and doesn't return any value
+
+            interface Consumer<T>{
+                void accept(T t);
+            }
+
+            Consumer consumer =  stringvar -> System.out.println(stringvar);
+
+                - describes a method that receives a parameter of type String and returns nothing
+
+            Consumer consumer = System.out :: println ;
+
+            Consumer<Employee> consumer = new Consumer<Employee>{
+                void accept(Employee emp){
+                    System.out.println(emp);
+                }
+            }
+
+            Consumer<Employee> consumer = emp -> System.out.println(emp);
+
+    **Function<T, R> interface 
+    -------------------------------
+
+        - receives a parameter of Type t and returns a value of type R
+
+            interface Function<T,R>{
+                R apply(T t);
+            }
+
+            Function<Employee, String> function = new Function<Employee, String>{
+                public String apply(Employee emp){
+                    return emp.getEmail();
+                }
+            }
+
+            Function<Employee, String> function = emp -> emp.getEmail();
+            
+
+        **Method Reference 
+        ----------------------
+
+
+     Stream API 
+    -----------------
+        - introduced in java 8 
+        - stream api is used to process the elements of collection 
+        - it used to perform "Aggregate operations" and "Termainal operations" 
+
+        - What is a "Stream"? 
+            - a sequence of elements from a "source" (Collection / Array / String) 
+            - supports aggregate operations 
+            - can be processed sequentially as well as parallel 
+
+            - 'Stream' a is a data structure (it doesn't store data)
+            - it is not a collection 
+
+
+        - `how to create a "Stream" ?
+
+            - from a collection 
+
+                    Stream<Student> s = list.stream()
+                    Stream<Employee> s = set.stream()
+                    Stream<String> s = queue.stream()
+                    Stream<?> s = map.entrySet().stream() 
+
+            - from an array 
+
+                int[] numbers = {12,54,34,34,23,23,54};
+                Stream<Integer> s = Arrays.stream(numbers)
+                IntStream s = Arrays.stream(numbers)
+
+            - from a File 
+
+
+        **Stream Pipeline structure 
+
+            - Every stream pipeline has ....
+
+                    1. Source (Collection / array / string)
+                    2. 0 or more Intermediate operations 
+                    3. 1 terminal operation 
+
+        **Intermediate Operations (methods)
+            - every intermediate operation....
+                    - returns a NEW Stream 
+                    - don't execute immediately 
+                    - are lazy until terminal operation is called 
+
+
+            - filter(Predicate)
+
+            - map(Function)
+                - mapToInt()
+                - mapToDouble()
+                - flatMap()
+                - distinct()
+
+            - sorted(Comparator)
+
+            - limit(n)
+
+            - skip(n)
+
+            - peek(Consumer)
+
+
+        **Terminal Operations (methods)
+            - trigger execution 
+            - every stream must have 1 terminal operation
+            - may produce final result or a side effect 
+            - ends the stream 
+
+
+            - forEach(Consumer)
+
+            - count() 
+
+            - sum()
+
+            - average()
+
+            - min() 
+
+            - max() 
+
+            - anyMatch(Predicate)
+
+            - allMatch(Predicate)
+
+            - findFirst(Predicate)
+
+            - findAny(Predicate)
+
+            - collect(Collector)
+
+            - reduce()
