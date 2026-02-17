@@ -1595,3 +1595,107 @@ Functional Interface
             - collect(Collector)
 
             - reduce()
+
+
+
+    Multithreading in java 
+    ----------------------------
+        - running multiple independent pieces of code at the same time 
+        - A thread is the smallest sequence of instructions within a process that can be executed by the CPU independently.
+        - threads can run multiple tasks simultaneouly 
+            - threads can share the same heap memory with other threads 
+            - each thread has it's own stack (local variables, call frames)
+        - once the thraed completes the execution of the run() method, the state becomes "TERMINATED"
+            - "TERMINATED" thread cannot be started again
+
+            program - 
+                part1 - 10000 lines - 10 sec
+                part2 - 5000 lines  - 10 sec
+
+            
+            **How to create a thread 
+
+                A) - Create a class that extends from Thread class 
+
+                    public class MyThread extends Thread {
+
+                        public void run(){
+                            //code that is supposed to execute inside a thread 
+                            //code 
+                            //code
+                            //code
+                        }
+                    }
+
+                    MyThread thread = new MyThread();
+                    thread.start();
+
+                B) - Create a thread using "Runnable" interface 
+                        
+                        interface Runnable {
+                                public abstract void run();
+                        }
+
+                        public class MyTask implements Runnable {
+                            public void run(){
+                                //code that is executed inside a thread 
+                            }
+                        }
+
+                        - MyTask class represents a runnable task / runnable target 
+
+                        Runnable task = new MyTask();
+                        Thread t1 = new Thread(task);
+                        t1.start();
+
+
+            **How to start a thread 
+
+                    .start() - starts the thread, and internally it invokes the run() methods 
+
+
+
+    **Unit Testing 
+    ----------------------\\    \
+        - process of verifying the correctness of the smallest testable parts of an application
+        - Unit can be:
+            - class 
+            - method 
+            - any logical component 
+
+        - ensure correctness 
+        - prevent regressions 
+        - enable safe refactoring 
+        - improve the code quality 
+
+
+    - JUnit 5 Framework
+        - testing framework
+        - also known as JUnit Jupiter
+
+        1. JUnit Platform - 
+            - launch the testing framework
+            - executes the test engines 
+
+        2. JUnit Jupiter 
+            - provides programming model
+            - provides annotations, assertions, assumptions, programming features to write the test cases 
+
+        3. JUnit Vintage 
+            - supports junit 3 and 4 tests 
+
+
+
+     - @Test: marks the method as test case 
+
+     - assertEquals(5, result): verifies the correctness of the result 
+
+     - if assertion fails --> test fails    
+
+     - assertEquals(expected, actual)
+     - assertNotEquals(expected, actual)
+     - assertTrue(condition)
+     - assertFalse(condition)
+     - assertNull(object)
+     - assertNotNull(object)
+     - assertThrows(Exception.class, executable)
