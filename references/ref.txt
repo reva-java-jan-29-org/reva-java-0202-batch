@@ -1712,3 +1712,238 @@ Functional Interface
 
      com.
 
+
+
+
+
+     Week4 - 23 Feb 
+     ----------------------
+
+        Spring Framework 
+            - open source java framework used to build enterprise-grade java, loosly-coupled and testable applications
+            - standardized way to build the applications 
+            - provides comprehensive infrastructure support to develop java applciations 
+            - Spring Framework is a collection of modules and a few independent "spring projects" built of top of it 
+            -** IMP: "The Spring Framework provides a comprehensive programming and configuration model for modern Java-based enterprise applications - on any kind of deployment platform."
+
+        CORE MODULES OF SPRING FRAMEWORK  
+
+            ** Spring Core 
+
+                - provides the "IoC Container" and "Dependency Injection engine"
+                - it is reponsible for "object life cycle management" 
+                - it solves the tight coupling  
+
+            ** Spring AOP 
+                - handle "cross-cutting concerns" (logging, transactions, security etc) without polluting the business logic 
+
+            ** Spring JDBC 
+                - simplifies the db interactions 
+
+            ** Spring ORM 
+                - used to integrate with ORM Framworks like hibernate
+
+            ** Spring Web 
+                - provides foundational web utilities and servlet integration
+                - base layer for developing web application
+
+            ** Spring MVC 
+                - implement the Model-View-Controller design pattern for web applications and REST APIs 
+
+            ** Spring Test
+                - it simplifies writing unit and integration tests 
+
+
+        MAJOR SPRING PROEJECTS 
+
+            ** Spring Boot 
+
+            ** Spring Data 
+
+                - Spring Data JPA 
+
+                - Spring Data MongoDB 
+
+                - Spring Data REST  
+
+                - ...
+
+            ** Spring Cloud 
+
+                - Spring Cloud Netflix
+
+                - Spring Cloud Config
+
+                - Spring Cloud Gateway
+
+                - Spring Cloud OpenFeign
+
+                - Spring Cloud Circuit Breaker
+
+                - 
+
+
+            ** Spring Security 
+
+
+            ** Spring Batch 
+
+
+            ** 
+
+
+
+
+            **NOTE: WHY SRPING FRAMEWORK is Modular 
+                - each module isolates the architectural concern, makes systems modular, maintainable and scalable
+                - each module is used to perform specific tasks, provides solution to specific business problems
+
+                - Core                  - Object lifecyle 
+                - AOP                   - cross-cutting concerns 
+                - Data Persistence      - Spring JDBC / Spring ORM / Spring Data
+                - Web application       - Spring Web / MVC 
+                - Security              - Spring Security 
+                - Microservices         - Spring Could 
+                - Rapid Development     - Spring Boot 
+
+
+
+
+            SPRING CORE 
+                - it is "Foundation" of the entire spring eco system
+                - Spring core is responsible for - Object Creation, Initialization, Wiring, and Lifecycle Management 
+                     - this is achieved through 
+                        - IoC (Inversion of Control)
+                        - Dependency Injection 
+                        - Bean Management 
+                        - ApplicationContext
+
+
+                IoC - Inversion of Control 
+                    - principle in software engineering which transfer / delegates the control of objects to a "container"
+
+                IoC Container 
+                    - responsible to manage the lifecycle of objects 
+                    - handles Object Creation, Configuration (Initialization), wiring, and lifecyle management 
+                    - spring container (ioc container) is the engine which runs your spring application 
+
+                    - BeanFactory 
+
+                    - ApplicationContext
+                        - is the most common used spring container interface 
+
+                        interface BeanFactory 
+                                |
+                                |-> XmlBeanFactory (removed from Spring 4.0)
+                                |
+                        interface ApplicationContext    
+                                |
+                                |
+                        --------------------------------------------------------------------------------------
+                        - ClassPathXmlApplicationContext
+                            - load the xml based configuration in the classpath 
+
+                        - AnnotationConfigApplicationContext
+                            - load the java configuration
+
+                        - FileSystemXmlApplicationContext
+                        - AnnotationConfigWebApplicationContext
+
+
+                Spring Bean 
+                    - Spring Bean is an object that is instantiated, initialized, assembled, and managed by IoC container 
+
+                BeanDefinition 
+                    - metadata about the bean that tells spring "WHAT" objects should be created, "HOW" to create it, and "How" to wire it 
+                        - Configure HOW and WHICH objects should be created by IoC contaier 
+                    - Spring does not directly create objects automatically 
+                    - it creates / loads the "Bean Definitions"
+
+                    - **the BeanDefinitions can be configured in 3 ways 
+
+                        1. using xml-based configuration 
+
+                                //configure the beans in the .xml file 
+                                    <beans>
+                                          //bean configuration 
+                                        <bean id="" class=""></bean>
+                                    </beans>
+
+                                //load the bean definition
+                                ApplicationContext context = new ClassPathXmlApplicationContext("spring-beans.xml");
+
+                                    **  - loads/reads the given the configuration file 
+                                        - creates BeanDefinitions based on the xml configuration 
+                                        - Registers beans 
+                                        - instantiates (creates) the objects 
+                                        - injects the dependencies 
+                                        - applies "BeanPostProcessors"
+                                        - Creates AOP proxies if required 
+                                        - Stores beans in the cache  
+
+                        2. using java-based configuration 
+
+                                - @Configuration and @Bean annotations are used to define "BeanDefinitions"
+                                        programmatically instead of xml 
+
+
+                                        @Bean
+                                        public EmployeeDao employeeDao() {
+                                            return new EmployeeDao();
+                                        }
+
+                        3. using annotations 
+
+
+                **Libraries for Spring Core module - spring-core, spring-beans, spring-expression, spring-context 
+
+
+                **Dependency Injection 
+                    - connecting objects with dependent objects = injecting 
+
+                    - Constructor injection 
+                        - dependencies are provided through the constructor when the bean is created 
+
+                            <bean id="employeeService" class="com.training.service.EmployeeService">
+                                <constructor-arg ref="employeeDao" />
+                                
+                            </bean>
+                            
+                            
+                            <bean id="employeeDao" class="com.training.dao.EmployeeDao">
+                            
+                            </bean>
+                    - Setter (/property) injection 
+                        - dependencies are injected after object creation, through the setter methods 
+
+             - Bean Scopes 
+                - Singleton - One single bean instance per Spring IoC container.
+                - Prototype - A new bean instance is created each time when requested using the getBean() method        .
+                - Request - A single bean per HTTP/HTTPS(Web) request.*
+                - Session - A single bean instance per HTTP/HTTPS session.*
+                - Global Session - A single bean instance per HTTP/HTTPS global session.*
+                - Application - A single bean per lifecycle of a ServletContext.*        
+
+
+            Important Annotations in Spring 
+                - @Configuration
+                - @ComponentScan 
+                - @Bean 
+                - @Scope 
+                - @Primary 
+                - @Component  
+
+        **PROJECT LOMBOK 
+        ------------------
+            - this is a compile-time code generation library that reduces the boilerplate code by using some annotations 
+            - it is used to generate constructors, getter/settes, builders, equals/hashcode, toString, logging fields etc. 
+
+
+            -**To use project-lombok in your project 
+                1. add Lombok Dependency in your project (pom.xml file)
+                2. Install Lombok on your machine (you IDE must support Lombok)
+
+
+
+
+           
