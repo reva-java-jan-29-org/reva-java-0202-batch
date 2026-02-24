@@ -1932,6 +1932,9 @@ Functional Interface
                 - @Scope 
                 - @Primary 
                 - @Component  
+                - @Autowired
+                - @Qualifier
+                
 
         **PROJECT LOMBOK 
         ------------------
