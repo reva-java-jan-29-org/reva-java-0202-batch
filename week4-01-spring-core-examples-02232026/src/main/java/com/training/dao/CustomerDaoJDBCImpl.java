@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.training.model.Customer;
 
-@Component("custJDBCImpl")
+@Component()
 public class CustomerDaoJDBCImpl implements CustomerDao {
 
 	public CustomerDaoJDBCImpl() {

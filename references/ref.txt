@@ -1934,8 +1934,97 @@ Functional Interface
                 - @Component  
                 - @Autowired
                 - @Qualifier
-                
 
+
+        ** Bean lifecycle 
+
+                1. INSTANTIATION (Creating object)
+                    - Spring reads bean definition (from @Component, @Bean, XML)
+                    - Spring calls constructor (or factory method)
+                        - by default no-arg constructor is called 
+                        - Dependencies can be injected via constructor args at this point
+                2. POPULATION (Dependency Injection)
+                    - xml 
+                        - dependencies can be injected using <property />
+                    - java
+                        - use the setter methods inside @Bean method logic 
+                        - @Autowired setter methods are called (setter injection)
+                        - @Autowired fields are set via "reflection" (field injection)
+                    - Bean has all dependencies set now
+                3. AWARE INTERFACES
+                    - main purpose is to allow Beans to be aware of certain specific objects or environmental information within the Spring container. By implementing these interfaces, a Bean can obtain important resources from the Spring container during its initialization, such as the ApplicationContext 
+
+                    - a java class can implement below interfaces 
+                        - BeanNameAware 
+                        - BeanFactoryAware 
+                        - ApplicationContextAware
+
+                    - BeanNameAware.setBeanName(String name) — bean receives its own name
+                    - BeanFactoryAware.setBeanFactory(BeanFactory bf) — receives BeanFactory
+                    - ApplicationContextAware.setApplicationContext(ctx) — receives context
+
+                4. PRE-INITIALISATION (BeanPostProcessor)
+                    - register the bean to the BeanPostProcessor 
+                    - in this phase, the fields marked with @Autowired, @Value, @Resource will get processed 
+
+                    - BeanPostProcessor.postProcessBeforeInitialization() — all registered BPPs called
+
+                5. INITIALISATION
+                    - the bean is fully constructed and dependeices are injected 
+                    - during this phase, spring runs the intialization logic 
+
+                    a. @PostConstruct method called (JSR-250 — Jakarta annotation)
+                        - can be used to perform validation, to ensure the initialized values are correct 
+                            - for example: db validation, validating the config, starting some background tasks 
+
+                    OR
+                    b. InitializingBean.afterPropertiesSet() called (if implemented)
+                        - this older approach 
+
+                    OR
+                    c. Custom init-method called (if configured in XML or @Bean(initMethod=...))
+
+                6. POST-INITIALISATION (BeanPostProcessor)
+                    - BeanPostProcessor.postProcessAfterInitialization() — all BPPs called again
+                    - THIS is where AOP proxies are created! (@Transactional, @Async etc.)
+
+                    - manage the transactions, this the point to start the transaction 
+                    - commit or rollback 
+
+                7.  BEAN IS READY
+                    - The bean is now fully initialized and available for use
+                    - wrapped in proxy (if needed)
+                    - managed by container 
+                    - available to injection to the other object if needed 
+                
+                8. DESTRUCTION (on context shutdown)
+                    - when Spring closes the ApplicationContext, all the beans are deleted 
+                    - below methods can be used to close connections, flush caches, shut down thread pools etc.
+
+                        a. @PreDestroy method called (JSR-250)
+                            OR
+                        b. DisposableBean.destroy() called (if implemented)
+                            Or
+                        c. Custom destroy-method called (if configured)
+
+
+
+
+
+
+
+
+
+
+
+        **- What are annotations ?
+
+            - annotations are used to attach metadata to the elements (classes, methods, fields, parameters, constructor etc.)
+            - annotations provide information that can be...\   
+                - read by compiler 
+                - read by the runtime (via reflection)
+                - processed by frameworks (like spring)
+                - read by tools (like lombok, jpa)
         **PROJECT LOMBOK 
         ------------------
             - this is a compile-time code generation library that reduces the boilerplate code by using some annotations 
@@ -1945,6 +2034,14 @@ Functional Interface
             -**To use project-lombok in your project 
                 1. add Lombok Dependency in your project (pom.xml file)
                 2. Install Lombok on your machine (you IDE must support Lombok)
+
+
+                @Data 
+                @getter
+                @Setter 
+                @AllArgsConstructor 
+                @ToString 
+
 
 
 

@@ -8,13 +8,13 @@
 
 	<!-- bean definition  -->
 	
-	<bean id="employeeService" class="com.training.service.EmployeeService">
-		<!-- <constructor-arg ref="employeeDao" /> -->
-		<property name="employeeDao" ref="employeeDao" />
+	<bean id="employeeService"  class="com.training.service.EmployeeService">
+		<!-- <constructor-arg ref="employeeDao" />  -->
+		 <property name="employeeDao" ref="employeeDao" /> 
 	</bean>
 	
 	
-	<bean id="emp1" name="emp1" class="com.training.model.Employee" scope="singleton" primary="true">
+	<!-- <bean id="emp1" name="emp1" class="com.training.model.Employee" scope="singleton" primary="true">
 		<constructor-arg name="id">
 			<value>101</value>
 		</constructor-arg>
@@ -33,7 +33,7 @@
 		<constructor-arg name="salary" value="15000.00" />
 		<constructor-arg name="projectName" value="Persistent" />
 	</bean>
-	
+	 -->
 	
 	<!-- <bean id="emp2" name="emp2" class="com.training.model.Employee">
 		<property name="id" value="102" />
@@ -47,9 +47,9 @@
 	
 	</bean>
 	
-	<bean id="c1" class="com.training.dao.CustomerDaoJDBCImpl" primary="true" />
+	<!-- <bean id="c1" class="com.training.dao.CustomerDaoJDBCImpl" primary="true" />
 	
 	<bean id="c2" class="com.training.dao.CustomerDaoJPAImpl" />
-
+ -->
 	
 </beans>

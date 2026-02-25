@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class EmployeeDao {
 	
 	public EmployeeDao() {
-		System.out.println("EmployeeDAO no-arg constructor");
+		System.out.println("1. instantiation is done! EmployeeDAO no-arg constructor");
 	}
 
 }
