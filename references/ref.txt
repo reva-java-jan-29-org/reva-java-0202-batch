@@ -1846,6 +1846,8 @@ Functional Interface
                         - AnnotationConfigApplicationContext
                             - load the java configuration
 
+                        - ConfigurableApplicationContext
+
                         - FileSystemXmlApplicationContext
                         - AnnotationConfigWebApplicationContext
 
@@ -2009,10 +2011,24 @@ Functional Interface
 
 
 
+            ** Spring Boot 
+            -----------------------
 
+                - SpringApplication.run() 
+                    - it is a static helper method provided by Spring Boot, which loads the given configuration class and returns "context" / "Container"
 
+                - Spring Boot is an open-source, Java-based framework built on top of the Spring Framework that dramatically simplifies the process of creating production-ready, stand-alone Spring applications. 
 
+                - The four main pillars are: 
+                    (1) Auto-Configuration — automatically configures beans based on classpath dependencies, 
+                    (2) Starter Dependencies — curated, pre-tested dependency sets that simplify Maven/Gradle configuration, 
+                    (3) Embedded Server — includes Tomcat/Jetty/Undertow inside the JAR for self-contained deployment, and 
+                    (4) Production-Ready Features — Actuator provides health checks, metrics, auditing, and monitoring endpoints out of the box.
 
+                - Eclipse IDE
+                    - you can create a maven project and downlaod spring boot starter dependencies 
+                    - install "Spring tool suite" plugin through marketplace 
+                - Spring Tool Suite IDE 
 
 
 
