@@ -2059,7 +2059,101 @@ Functional Interface
                 @ToString 
 
 
+    JPA - Java/Jakarta Persistence API
+    ------------------------------------
+        - JPA is a specification / standard in java that defines how java objects 
+            should be mapped to relational database tables and how these objects 
+            should be persisted / retrieved / updated and deleted. 
+
+        - it is standard / specification that ORM Frameworks can implement 
+            - part of Jakarta EE Specification 
+
+        -** JPA is not an implementaion
+
+        - Low level JDBC 
+            - manual efforts - sql was written manully everywhere 
+            - use jdbc to connect to the db directly 
+            - mappig between java objects and tables was manual 
+            - code repetitive and error-prone 
+
+        - JPA 
+            - provides standard for mapping Object --> Table 
+            - provides JPQL (automatically generates sql)
+            - Transaction managemenet is integrated 
+            - Entity lifecycle management 
+
+
+        Class Employee {                            table employee 
+                                                    id      name      salary 
+            private int id;
+            private String name;
+            private double salary;
+
+        } 
+
+    ORM Frameworks
+    ------------------
+        - Object Relation Mapping 
+
+        -** Hibernate 
+        - EclipseLink 
+        - OpenJPA 
+
+    - Persistence Context 
+        - a set of entity instances managed by an entity-manager 
+
+    - Persistence Unit 
+        - group of entities to be managed 
+
+    - EntityManagerFactory 
+
+    - Entity Manager 
+        - responsible to persist the entities 
+
+    - Entity 
+        - an Entity class in JPA a persistent object that represetnts a table in relational database 
+        - any java object which is persisted by JPA EntityManager 
+        - every Entity class 
+            - annotated with @Entity annotation
+            - must have an @Id field 
+            - must have no-arg constuctor 
 
 
 
-           
+    SQL 
+
+        SELECT id, name, city, salary FROM Employee;
+
+        SELECT  name, salary FROM Employee;
+
+
+    JPQL 
+        select e FROM Employee e
+        SELECT e.name, e.salary FROM EMPLOYEE e
+
+
+    Spring Data JPA 
+    ----------------------
+        - Is a Spring module under "spring data" project 
+        - it built on top of JPA which drastically reduces the boilerplate code by providing 
+            repository pattern 
+
+        - Spring Data JPA is a wrapper around JPA and Hibernate, which abstracts 
+            the complexities by providig "Repository Pattern"
+
+
+            interface Repository<T, ID>
+                |
+                |
+                |
+            interface CrudRepository<T, ID>
+                |
+                |
+                |
+            interface PagingAndSortingRepository<T, ID>
+                |
+                |
+                |
+            interface JpaRepository<T, ID>
+                |
+                |
