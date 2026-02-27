@@ -2144,16 +2144,182 @@ Functional Interface
 
             interface Repository<T, ID>
                 |
-                |
+                |-> this is just a "Marker Interface"
+                |-> Captures the domain type to manage as well as the domain type's id type. 
+                |-> this tells spring that, this is a repository candiate, please create an implementation for it
                 |
             interface CrudRepository<T, ID>
                 |
-                |
-                |
+                |- S save(S entity)
+                    - internally it calls EntityManager.persist() if the entity is new 
+                    - OR it calls EntityManager.merge() if existing/detached entity 
+                |- Optional<T> findById(ID id);
+                    - internall it calls EntityManager.find()
+                |- boolean existsById(ID id);
+                |- Iterable<T> findAll();
+                |- long count();
+                |   
             interface PagingAndSortingRepository<T, ID>
                 |
-                |
+                |- Page<T> findAll(Pageable pageable)
+                |- Iterable<T> findAll(Sort sort)
                 |
             interface JpaRepository<T, ID>
-                |
-                |
+                |-> provides JPA focused features 
+                |- List<S> findAll(Example<S> example)
+                |- List<S> findAll()
+                |- provides methods to perform batch operations 
+                |   - saveAllAndFlush(...)
+                    - deleteAllInBatch(...)
+
+        **How does spring data jpa internally works ?
+            - Spring Data creates the implementations for the repositories automatically 
+            - it creates a "proxy" bean for your repository interface 
+            - this proxy object intercepts the method calls like save(), findById(), etc. and delegates to a real backing implementation 
+
+
+        **Custom Queries in Spring data jpa 
+
+            1. using @Query(JPQL) 
+
+                @Query("SELECT e FROM Employee e WHERE e.city = :city")
+	            List<Employee> getAllEmployeesByCity(@Param("city") String city);
+
+
+                @Query(value = "select id, name, city, salary from Employee where city = :city", nativeQuery = true)
+	            List<Employee> getAllEmployeesByCity(@Param("city") String city);
+
+                @Modifying
+                @Transactional
+                @Query("UPDATE Employee e SET e.salary= :salary WHERE e.city = :city")
+                int incrementSalaryByCity(double salary, String city);
+
+
+            2. using "Query methods" 
+
+               List<Employee> findAllByCity(String city)
+
+            3. using Criteria API 
+                - used for dynamic filters 
+
+            4. using QueryDSL 
+                - used for dynamic filters or dynamic queries 
+
+
+
+
+        **Managed Entity 
+
+
+        **Detached Entity 
+
+
+        **EntityManager.merge()
+
+
+
+
+
+        interface EmployeeRepository extends CrudRepository<> {
+
+        }
+
+        class ProxyInstance implements EmployeeRepository {
+            //this proxy instance will automatically delegate the methods calls to the 
+                respective backing implementation
+        }
+
+        @Repository("vishalImpl")
+        class VishalClass implements EmployeeRepository {
+
+        }
+
+
+        class EmployeeService {
+
+            private EmployeeRepository empRepo; 
+
+            public EmployeeService(@Qualifier("vishalImpl") EmployeeRepository empRepo){
+
+            }
+        }
+
+       
+    --Entity Relationships 
+    ----------------------
+
+        1. OneToOne     - one entity relates to one other entity 
+
+        2. OneToMany    - one parent has many children 
+
+        3. ManyToOne    - many entities relate to one parent 
+
+        4. ManyToMany - 
+
+
+        OneToOne Unidirectional Relationship 
+        --------------------------------------------
+            - Each Employee has exactly one Profile 
+
+            - in unidirectional relatoinship, only Employee can navigate to Profile 
+                    Employee ---> Profile 
+
+            -*** in unidirectional relatoinship -> the owning side stores the FK field
+
+           class  Employee{                 class Profile {
+
+                int id                          int profileId; 
+                String name                     String bio
+
+                @OneToOne    
+                Profile profile;
+           }                                }
+
+
+           employees_table                                  profile_table 
+           ------------------                               -----------------------
+                                FK
+           id       name        profile_profile_id         profile_id.      bio
+
+
+         OneToOne BiDirectional Relationship 
+         -----------------------------------------
+          class  Employee{                 class Profile {
+
+                int id                          int profileId; 
+                String name                     String bio
+
+                @OneToOne                       @OneToOne 
+                Profile profile;                Employee employee;
+           }    
+
+            employees_table                                  profile_table 
+           ------------------                               -----------------------
+                                FK                                                  FK
+           id       name        profile_profile_id         profile_id.      bio     employee_id
+       
+    
+    **DEFAULT RELATIONSHIP MAPPING STRATEGIES (OneToOne)
+    ----------------------------------------------
+        aspect                  default strategry           what it means 
+        ---------------------------------------------------------------------------------------
+        mapping-strategy        joinColumn                  OneToOne will use FK-based reference 
+
+        FK Ownership            the side with @JoinColumn   only owner write the FK field value 
+
+        Fetch Policy            EAGER                       the referenced entities will be fetched 
+
+        Cascade                 NONE                        saving employee will not save profile (unless the profile is already persisted)
+                                                            (first save Profile then Save employee)
+
+     **RECOMMENDATIONS FOR OneToOne RELATIONSHIP
+     -------------------------------------------------
+        @OneToOne(
+            fetch = FetchType.LAZY      //avoid auto-joining related entities 
+            cascase = CascaseType.ALL   //persist / merge / remove will be automatically propogated
+        )
+        @JoinColumn(
+            name = "FK_profile_id",
+            nullable = false, 
+            unique = true
+        )
