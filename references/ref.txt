@@ -2244,17 +2244,42 @@ Functional Interface
             }
         }
 
+    --*NOTE: Association, Composition and Aggregation in Java 
+
+        Association 
+            - describes relationship between two classes 
+
+            Employee ---> Profile 
+
+        Aggregation
+            - represents "Weak Association"
+            - the contained object can exists independently 
+
+            Student -------> Course
+
+        Composition
+            - represents strong association  
+            - the lifecyle of the contained object depends on the container 
+            - Employee ---> Profile 
+
        
     --Entity Relationships 
     ----------------------
+        - Entity Relationships defines how two or more Entity classes are associated with each other 
+            and "How that association is mapped to the database"
 
-        1. OneToOne     - one entity relates to one other entity 
+        - In Java, a class can have reference to another class 
+        - In Database, a Table is connected with other table using "Foreign Keys"
 
-        2. OneToMany    - one parent has many children 
+        **Types of relationships 
 
-        3. ManyToOne    - many entities relate to one parent 
+        1. OneToOne     - one entity relates to exactly one other entity        Employee ---> Profile 
 
-        4. ManyToMany - 
+        2. OneToMany    - one entity relates to many entities                   Order -----> LineItems / Department ----> Employees 
+
+        3. ManyToOne    - many entities relate to one entity                    Employees --->  Department  / Orders ------> Customer
+
+        4. ManyToMany - many entities relate to many entities                   Students ---> Courses 
 
 
         OneToOne Unidirectional Relationship 
@@ -2280,6 +2305,15 @@ Functional Interface
            ------------------                               -----------------------
                                 FK
            id       name        profile_profile_id         profile_id.      bio
+           1        Rishav      101                         101             Rishav's bio 
+                                                            102             Rishav's updated bio
+
+           Employee emp = empRepo.findById(1)
+           sysout(emp.getProfile().getId())         //101
+
+           Profile profile = profileRepo.findById(102);
+           emp.setProfie(profile);
+           empRepo.save(emp)
 
 
          OneToOne BiDirectional Relationship 
@@ -2299,7 +2333,7 @@ Functional Interface
            id       name        profile_profile_id         profile_id.      bio     employee_id
        
     
-    **DEFAULT RELATIONSHIP MAPPING STRATEGIES (OneToOne)
+    **DEFAULT RELATIONSHIP MAPPING STRATEGIES (@OneToOne)
     ----------------------------------------------
         aspect                  default strategry           what it means 
         ---------------------------------------------------------------------------------------
@@ -2323,3 +2357,164 @@ Functional Interface
             nullable = false, 
             unique = true
         )
+
+        **Owning Side 
+            - controls the foreign key 
+            - defines the @JoinColumn
+            - Responsible for updating DB Relationship 
+
+        **Inverse Side (mappedBy)
+            - does NOT own the foreign key 
+            - uses "mappedBy"
+            - just reflects the relationship 
+
+
+        **What is Fetch Policy 
+        ----------------------------
+            - defines how JPA loads "related entities"
+            - with FetchType we can control whether the related entities should be loaded "Immediately (EAGER)" or "on-demand (LAZY)"
+
+                    FetchType.EAGER --> related entities are loaded immediately along with parent entity 
+                    FetchType.LAZY  --> related entities are loaded when accessed 
+
+        **What is cascade 
+        ----------------------
+            - when you perform an operation on parent entity, the same operation is applied on the related entity automatically 
+            - using CascadeType we can control propogation 
+
+                    PERSIST     -> save parent ---> also save child 
+                    MERGE       -> update parent ---> child also updated 
+                    REMOVE      -> remore parent --> child also removed 
+                    REFRESH     -> reload parent --> child also reloaded (retrieve)
+                    DETACH      -> detaches entity from persistence context  
+                    ALL 
+
+
+            public class SparePart {
+
+                    private Long partId;
+                    private String partCode;
+                    private String name;
+                    private BigDecimal unitPrice;
+                    private boolean active;
+                    private LocalDateTime createdAt;
+
+                    @OneToOne(fetch = ?, cascase =? )
+                    @JoinColumn(
+                         name = "?",
+                         nullable = false, 
+                         unique = true
+                    )
+                    private PartInventory partInventory;
+
+            }
+
+
+            public class PartInventory {
+
+                private Long inventoryId;
+                private int availableQty;
+                private int reorderLevel;
+                private LocalDateTime updatedAt;
+
+            }
+
+
+
+
+            **OneToMany Relationship 
+
+
+                class Employee {                    class Department {
+                    empId, name, city, ...                 deptId, name, ....
+
+                                                        @OneToMany()
+                                                        List<Employee> employees = new ArrayList();
+
+                                                        public void addEmployee(Employee emp){
+                                                            employees.add(emp)
+                                                        }
+
+                                                        public void removeEmployee(Employee emp ){
+                                                            employees.remove(emp)
+                                                        }
+                }                                   }
+
+                employee_table                                              department 
+                ---------------------                                       -----------------
+                empId      name            city                             deptId.         name 
+                101         Rishav          Pune                            1               IT department
+                102         Tushar          Mumbai
+                103         Ashwin          Pune
+              
+               
+               
+               
+                department_employee_table 
+                ----------------------------
+                deptId          empId
+                1               102
+                 
+
+                Employee emp1 = empRepo.findById(101)
+                Employee emp2 = empRepo.findById(102)
+
+                Department dep = depRepo.findById(1)
+                dep.addEmployee(emp1)
+                dep.addEmployee(emp2)
+
+                dep.removeEmployee(emp1)
+
+
+            --OneToMany BiDirectional
+
+              class Employee {                              class Department {
+                    empId, name, city, ...                          deptId, name, ....
+
+                    @ManyToOne                                      @OneToMany()
+                    Department department;                          List<Employee> employees = new ArrayList();
+
+              }                                                }
+
+
+            **DEFAULT RELATIONSHIP MAPPING STRATEGIES (@OneToMany)
+            ----------------------------------------------
+            aspect                  default strategry           what it means 
+            ---------------------------------------------------------------------------------------
+            mapping-strategy        joinTable                    a separate table is used to store the relationships 
+
+            FK Ownership            The "many" side table   only owner write the FK field value 
+
+            Fetch Policy            LAZY                       the referenced entities will be fetched 
+
+            Cascade                 NONE                        saving employee will not save profile (unless the profile is already persisted)
+                                                                (first save Profile then Save employee)
+
+
+
+            
+
+            class Student{                                      class Course{
+                studentId, name                                     courseId, courseName 
+
+                @ManyToMany                                         @ManyToMany(mappedBy="courses")
+                List<Course> courses;                               List<Student> students;
+
+            }                                                   }
+
+
+            student_table                                       course_table 
+            ------------------------                            --------------------
+            studentId.      name                                courseId.  courseName       
+            101             Monali                              1           Java 
+
+
+            student_course                                  
+            ------------------                              
+            studentId.      courseId                         
+            101             1                               
+
+
+
+
+            

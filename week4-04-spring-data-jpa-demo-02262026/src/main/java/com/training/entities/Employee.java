@@ -2,6 +2,7 @@ package com.training.entities;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,7 +39,7 @@ public class Employee {
 	@Transient
 	private int totalExperienceInYears;
 	
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	private Profile profile;
 
 	@Override
