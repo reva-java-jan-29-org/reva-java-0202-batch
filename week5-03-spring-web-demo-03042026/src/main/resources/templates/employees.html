@@ -1,0 +1,24 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>My First Web page</title>
+</head>
+<body>
+<h1>Showing List of Employees</h1>
+
+<table border="1">
+	<tr>
+		<td>id</td>
+		<td>name</td>
+		<td>city</td>
+		<td>salary</td>
+	</tr>
+	<tr th:each="emp : ${employees}">
+		<td th:text="${emp.empId}"></td>
+		<td th:text="${emp.name}"></td>
+		<td th:text="${emp.city}"></td>
+		<td th:text="${emp.salary}"></td>
+	</tr>
+</table>
+
+</body>
+</html>

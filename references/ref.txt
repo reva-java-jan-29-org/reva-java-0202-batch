@@ -2515,6 +2515,12 @@ Functional Interface
             101             1                               
 
 
+    Spring Web 
+    ----------------
+        - used to build Web applications and REST APIs 
+        - spring web is a part of spring framework that handles building web applciations 
+            - it used to handle requests, process responses, routing and controllers . 
+            - spring web is built on top of "Servlet API" and it uses Spring MVC Architecture 
 
-
-            
+        - spring-boot-starter-web is a single dependency that bundles everything you need to build 
+                web applications and REST APIs
