@@ -2524,3 +2524,59 @@ Functional Interface
 
         - spring-boot-starter-web is a single dependency that bundles everything you need to build 
                 web applications and REST APIs
+
+
+
+    @Repository
+    interface EmployeeRepository {
+
+    }
+
+    @Service("a")
+    @Primary
+    class A implements EmployeeRepository{
+
+    }
+
+    @Service("b")
+    class B implements EmployeeRepository {
+
+    }
+
+    @Service
+    Class EmployeeService  {
+
+        @Autowired
+        privte EmployeeRepository employeeRepository;
+
+        public EmployeeService(Qualifier("b") EmployeeRepository employeeRepository){
+
+        }
+
+    }
+
+ 
+
+    - if the dependent object initialization is mandatory - Constructor injection 
+    - if dependent object initialization is optional - setter injection 
+
+
+    class ReportService {
+
+        private Notifier notifier; 
+
+        public ReportService(Notififer notifier){
+            this.notifier = notifier;
+        }
+        
+        public void setNotifier(Notifier notifier){
+            this.notifier = notifier;
+        }
+
+        public void emailNotification(){
+            if(notifier!=null)
+                notifier.sendEmail();
+            else 
+                sysout("email sending service is temporarily unavailable");
+        }
+    }

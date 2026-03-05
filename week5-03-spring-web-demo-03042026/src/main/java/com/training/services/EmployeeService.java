@@ -9,6 +9,7 @@ import com.training.dto.EmployeeResponse;
 import com.training.entities.Employee;
 import com.training.repositories.EmployeeRepository;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.NoArgsConstructor;
 
 @Service
@@ -19,7 +20,8 @@ public class EmployeeService {
 	private EmployeeRepository employeeRepository;
 	
 	public Employee findById(Long id) {
-		return employeeRepository.findById(id).orElse(null);
+		return employeeRepository.findById(id)
+				.orElseThrow(()-> new EntityNotFoundException("Employee with the given ID not found!"));
 	}
 	
 	public List<EmployeeResponse> findAllEmployees(){

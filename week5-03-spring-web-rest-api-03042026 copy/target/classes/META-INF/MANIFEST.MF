@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Build-Jdk-Spec: 21
-Implementation-Title: week5-01-jpa-entity-relationships-03012026
+Implementation-Title: week5-03-spring-web-rest-api-03042026
 Implementation-Version: 0.0.1-SNAPSHOT
 Created-By: Maven Integration for Eclipse
 

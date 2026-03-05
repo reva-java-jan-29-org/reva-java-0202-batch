@@ -1,11 +1,13 @@
 package com.training.controllers;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,53 +17,51 @@ import org.springframework.web.bind.annotation.RestController;
 import com.training.dto.EmployeeRequest;
 import com.training.dto.EmployeeResponse;
 import com.training.entities.Employee;
+import com.training.exceptions.CustomFieldError;
+import com.training.exceptions.ErrorResponse;
+import com.training.exceptions.ErrorResponseDTO;
 import com.training.services.EmployeeService;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 public class EmployeeController {
-	
+
 	@Autowired
 	private EmployeeService employeeService;
-	
-	
+
 	@GetMapping("/employees")
-	public List<EmployeeResponse> getAllEmployees(){
-		
+	public List<EmployeeResponse> getAllEmployees() {
+
 		return employeeService.findAllEmployees();
 	}
-	
-	
+
 	@PostMapping("/employees")
-	public ResponseEntity<?> createEmployee(@RequestBody EmployeeRequest empRequset) {
-		
-		
-		
+	public ResponseEntity<?> createEmployee(@RequestBody @Valid EmployeeRequest empRequset) {
+
 		Employee employee = new Employee();
 		employee.setCity(empRequset.getCity());
 		employee.setName(empRequset.getName());
 		employee.setSalary(empRequset.getSalary());
-		
+
 		EmployeeResponse empResponse = employeeService.save(employee);
-		
-		if(empResponse!=null)
+
+		if (empResponse != null)
 			return new ResponseEntity<EmployeeResponse>(empResponse, HttpStatus.OK);
-		else 
+		else
 			return new ResponseEntity("Employee Couldn't be created", HttpStatus.NOT_FOUND);
 	}
-	
-	
+
 	@GetMapping("/employees/{id}")
 	public ResponseEntity<?> getEmployee(@PathVariable() Long id) {
-		
+
 		Employee emp = employeeService.findById(id);
 		
-		if(emp!=null)
-			return new ResponseEntity<Employee>(emp, HttpStatus.OK);
-		else 
-			return new ResponseEntity("Employee not found", HttpStatus.NOT_FOUND);
+		return new ResponseEntity<Employee>(emp, HttpStatus.OK);
+		
 	}
-	
-	
 	
 	
 	
@@ -70,7 +70,6 @@ public class EmployeeController {
 	
 	
 
-	
 //	@GetMapping("/employees")
 //	public String listEmployees(Model model) {
 //		
@@ -85,7 +84,7 @@ public class EmployeeController {
 //		
 //		return "employees";	//return "viewname / name of your html file"
 //	}
-	
+
 //	@GetMapping("/employeesdata")
 //	@ResponseBody
 //	public List<Employee> listEmployeesData() {
