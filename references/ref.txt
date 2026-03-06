@@ -2617,6 +2617,8 @@ Functional Interface
                         SessionCreationPolicy.IF_REQUIRED
                 - this means, spring may create a "Session" if needed, authentication can be stored in the session
 
+            - by default, uses BasicAuthenticationFilter
+
 
         **HOW the Basic Authentication internally works?
             Here is a clear high-level internal flow diagram of Basic Authentication in Spring Security. I’ll show it exactly in the order it happens when a request hits a secured endpoint.
@@ -2735,3 +2737,21 @@ UserDetailsService	Load user data
 PasswordEncoder	Verify password
 SecurityContextHolder	Store authenticated user
 Authorization layer	Check roles/permissions
+
+
+    **IMP: what are the different types of AuthenticationProvider?
+
+
+
+    **IMP: What is SecurityContext in Spring Security? 
+
+
+
+
+    **IMP: what is "record" in Java?
+        - Java records (introduced in Java 16, stable in Java 17) are perfect for simple, immutable data carriers like DTOs. They automatically generate:
+
+            final fields
+            Constructor
+            Getters (field name without get prefix)
+            equals(), hashCode(), toString()
