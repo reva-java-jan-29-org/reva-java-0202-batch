@@ -2580,3 +2580,158 @@ Functional Interface
                 sysout("email sending service is temporarily unavailable");
         }
     }
+
+
+
+
+    Spring Security
+    -------------------------
+        - provides authentication and authorization framework 
+
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+        **- after adding this dependeicy to the pom.xml, spring boot applies some auto-configuration
+            - by default, secures all the endpoints, it returns 401 Unauthorized 
+            - by default, spring security protects every request 
+            - it requires authentication unless you explicitely allow specific endpoints 
+
+        **- "Basic Authentication"
+            - By Default, spring security enables "Basic Authentication" which uses HTTP "Basic Auth"
+            - a default user called "user" is created automatically with auto generated password 
+                    - but you can define below properties in the application.properties file for a default user 
+
+                            spring.security.user.name=vishal
+                            spring.security.user.password=vishal123   
+
+            - spring security also creates a default "login page" for authentication
+
+            - by default, spring security enables "CSRF (Cross Site Request Forgery) " protection
+                - the means, all the POST, PUT, PATCH, DELETE  endpoints are secured 
+
+            - by default, spring security allows "Session based" security 
+                - if you do not configure "Stateless mode", spring security can use HTTP session based authentication
+                - the default behavior of Session Policy is 
+                        SessionCreationPolicy.IF_REQUIRED
+                - this means, spring may create a "Session" if needed, authentication can be stored in the session
+
+
+        **HOW the Basic Authentication internally works?
+            Here is a clear high-level internal flow diagram of Basic Authentication in Spring Security. I’ll show it exactly in the order it happens when a request hits a secured endpoint.
+
+CLIENT (Browser / Postman / Curl)
+        |
+        |  HTTP Request
+        |  Authorization: Basic base64(username:password)
+        v
++--------------------------------------+
+| Spring Security Filter Chain         |
++--------------------------------------+
+        |
+        v
++--------------------------------------+
+| BasicAuthenticationFilter            |
+|--------------------------------------|
+| 1. Check Authorization header        |
+| 2. Verify it starts with "Basic"     |
+| 3. Decode Base64 credentials         |
+| 4. Extract username + password       |
+| 5. Create Authentication object      |
+|    (UsernamePasswordAuthenticationToken)
++--------------------------------------+
+        |
+        v
++--------------------------------------+
+| AuthenticationManager                |
+| (usually ProviderManager)            |
++--------------------------------------+
+        |
+        v
++--------------------------------------+
+| AuthenticationProvider               |
+| (e.g. DaoAuthenticationProvider)     |
+|--------------------------------------|
+| 1. Calls UserDetailsService          |
+| 2. loadUserByUsername(username)      |
+| 3. Fetch user from DB / memory       |
+| 4. Compare password using            |
+|    PasswordEncoder                   |
++--------------------------------------+
+        |
+        | success
+        v
++--------------------------------------+
+| Authenticated Authentication Object  |
+|--------------------------------------|
+| Contains:                            |
+| - username                           |
+| - authorities (roles)                |
+| - authenticated=true                 |
++--------------------------------------+
+        |
+        v
++--------------------------------------+
+| SecurityContextHolder                |
+|--------------------------------------|
+| Stores Authentication for request    |
+| Current user now available globally  |
++--------------------------------------+
+        |
+        v
++--------------------------------------+
+| Authorization Phase                  |
+|--------------------------------------|
+| Check roles/permissions              |
+| Example: hasRole("ADMIN")            |
++--------------------------------------+
+        |
+        | allowed
+        |
+        |
+   DispatcherServlet     
+        |
+        |
+        v
++--------------------------------------+
+| Controller                           |
+|--------------------------------------|
+| Request reaches @RestController      |
+| Principal available                  |
+| SecurityContextHolder.getContext()   |
++--------------------------------------+
+        |
+        v
+     RESPONSE
+What happens if authentication fails
+BasicAuthenticationFilter
+        |
+        v
+AuthenticationManager
+        |
+        v
+AuthenticationProvider
+        |
+        |  password mismatch / user not found
+        v
+AuthenticationException
+        |
+        v
+AuthenticationEntryPoint
+        |
+        v
+HTTP 401 Unauthorized
+WWW-Authenticate: Basic realm="..."
+One more mental model (very important)
+
+Spring Security separates responsibilities:
+
+Component	Responsibility
+Filter	Extract credentials from HTTP request
+AuthenticationManager	Decide who can authenticate
+AuthenticationProvider	Validate credentials
+UserDetailsService	Load user data
+PasswordEncoder	Verify password
+SecurityContextHolder	Store authenticated user
+Authorization layer	Check roles/permissions
