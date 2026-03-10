@@ -72,7 +72,7 @@ public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
-    private Long courseId;
+    private Long courseId;		//default value for ref types is always null, jpa uses null naturally to mean that the "identifer is not assigned yet"
 
     @Column(name = "course_name", nullable = false)
     private String courseName;

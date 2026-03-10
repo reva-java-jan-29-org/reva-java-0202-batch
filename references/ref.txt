@@ -2515,6 +2515,56 @@ Functional Interface
             101             1                               
 
 
+
+        - Entity Inheritance:
+        -----------------------
+
+            @Entity 
+            @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+            class User {
+
+                @Id 
+                private Long id;
+                String username;
+                STring password;
+                Role role;
+                ...
+            }
+
+            @Entity
+            class Customer extend User {
+
+                private String city, country;
+            }
+
+            @Entity 
+            class Supplier extends User {
+
+               String  supplierCode;
+            }
+
+            new Customer("vishal", ......)
+            new Supplier("Rishav", ....)
+
+            user_tb
+            --------------
+            id    username.   password.     role            
+            1       vishal      ..          Customer        
+            2       Rishav      ...         SUPPLIER      
+
+
+            customer_tb 
+            id    username.   password.     role     city       country 
+            1           ..      ..
+
+
+            supplier_tb 
+            id    username.   password.     role.  supplierCode
+              
+
+
+
+
     Spring Web 
     ----------------
         - used to build Web applications and REST APIs 
@@ -2593,7 +2643,8 @@ Functional Interface
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-        **- after adding this dependeicy to the pom.xml, spring boot applies some auto-configuration
+        **- after adding this dependeicy to the pom.xml, spring boot applies some auto-configuration,
+             which by default enables "Basic Authentication"
             - by default, secures all the endpoints, it returns 401 Unauthorized 
             - by default, spring security protects every request 
             - it requires authentication unless you explicitely allow specific endpoints 
@@ -2755,3 +2806,107 @@ Authorization layer	Check roles/permissions
             Constructor
             Getters (field name without get prefix)
             equals(), hashCode(), toString()
+
+
+
+
+    Microservices:
+    -----------------------
+        - it is an architectural style where the large application is broken into small / independently deployablable services 
+
+        - Monolithic application
+            - a single, unified codebase packaged and deployed as one unit 
+            - simple to develop - one project, one ide, one run configuration
+            - simple to test - integration tests cover the whole system in one shot 
+            - simple to deploy - one artifact i.e. one .jar file, or one .war file. or one docker image 
+            - simple to debug - all the logic, modules are written inside a single unit, one log file, one stack trace, one process 
+
+        - Problems with Monolithic application
+            - deployement coupling 
+                - for every change, requires the entire application to be redeployed 
+
+            - scaling inefficiency 
+                - you can scale only the entire application, not any specific parts of the application 
+
+            - technology lock-in 
+                - use the same technology stack for the entire application 
+
+            - team scaling conflicts 
+                - merge conflicts 
+                - coordination overhead 
+                - slow build times 
+            
+            - fault propagation 
+
+
+        - What makes the service "micro" 
+            - single business Responsibility 
+            - independently deployable 
+            - owns its own data 
+            - communcations via API 
+            - Decentralized governance 
+            - designed for failure 
+
+
+
+
+        **Multi Module Spring Boot Project 
+            - 1. create a maven project with packaging = pom 
+            - 2. define the dependency-management for spring cloud version 
+            - 3. add the spring-boot-maven-plugin 
+
+            week6-02-microservices-mini-project-03102026            <<--Root (Parent POM)
+                |
+                |-pom.xml               <<--parent pom file 
+                |
+                |-config-server 
+                |   - pom.xml           <<--- child pom 
+                |
+                |-eureka-server 
+                |   - pom.xml
+                |
+                |-api-gateway
+                |   - pom.xml
+                |
+                |-user-service
+                |   - pom.xml           <<-spring cloud eureka client
+                |
+                |-product-service 
+                |   - pom.xml
+                |
+                |-order-service
+                |   - pom.xml
+
+
+        **Spring Boot Maven Plugin
+            - this plugin helps to build and run spring boot applications 
+            - you can run the project as "spring boot project" using maven command 
+                    mvn spring-boot:run 
+
+    
+
+
+
+    **Project1: SIST 
+        @Entity                                                             @Entity 
+        public class Product {                                              public class Inventory {
+            @Id                                                                     @Id 
+            private Long productId;                                                 private Long id;
+            private String sku;                                                     private int quantity
+            private String name;
+            private String category;
+            private BigDecimal price;
+            private boolean active;
+
+            @OneToOne(fetch = ?, cascade = ? )
+            Inventory inventory;
+
+        }                                                                     }
+
+
+        Order                                   OrderItem 
+
+
+
+        find all the products with stock available 
+        find all the products which are out of stock 

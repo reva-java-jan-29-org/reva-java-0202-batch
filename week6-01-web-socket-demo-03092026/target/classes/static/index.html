@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket + STOMP Chat Demo</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+        .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #e94560; margin-bottom: 6px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 20px; font-size: 13px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 16px; }
+        .tab { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer;
+               background: #16213e; color: #aaa; font-size: 14px; }
+        .tab.active { background: #e94560; color: #fff; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* ---- STOMP Chat Panel ---- */
+        .chat-card { background: #16213e; border-radius: 12px; padding: 20px; }
+        .status-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #888; }
+        .dot.connected { background: #4caf50; }
+        #statusText { font-size: 13px; color: #aaa; }
+        .join-form { display: flex; gap: 8px; margin-bottom: 14px; }
+        input[type=text] { flex: 1; padding: 9px 12px; border-radius: 6px;
+                           border: 1px solid #333; background: #0f3460; color: #eee; font-size: 14px; }
+        button { padding: 9px 16px; border: none; border-radius: 6px;
+                 background: #e94560; color: #fff; cursor: pointer; font-size: 14px; }
+        button:disabled { background: #555; cursor: default; }
+        button.secondary { background: #0f3460; }
+        #messages { height: 320px; overflow-y: auto; background: #0f3460;
+                    border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+        .msg { margin-bottom: 8px; font-size: 14px; line-height: 1.4; }
+        .msg .sender { font-weight: bold; color: #e94560; }
+        .msg.join  .sender { color: #4caf50; }
+        .msg.leave .sender { color: #ff9800; }
+        .msg.system .sender { color: #888; font-style: italic; }
+        .send-form { display: flex; gap: 8px; }
+
+        /* ---- Raw WS Panel ---- */
+        .raw-card { background: #16213e; border-radius: 12px; padding: 20px; }
+        #rawMessages { height: 260px; overflow-y: auto; background: #0f3460;
+                       border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 13px; }
+        .raw-entry { margin-bottom: 6px; }
+        .raw-entry.sent { color: #82b1ff; }
+        .raw-entry.recv { color: #a5d6a7; }
+        .raw-entry.info { color: #aaa; font-style: italic; }
+
+        /* ---- Concepts Panel ---- */
+        .concepts-card { background: #16213e; border-radius: 12px; padding: 24px; line-height: 1.7; }
+        .concepts-card h2 { color: #e94560; margin: 16px 0 8px; font-size: 17px; }
+        .concepts-card h3 { color: #82b1ff; margin: 12px 0 6px; font-size: 15px; }
+        .concepts-card p, .concepts-card li { font-size: 13px; color: #ccc; }
+        .concepts-card ul { padding-left: 20px; }
+        pre.code { background: #0f3460; padding: 12px; border-radius: 6px;
+                   font-size: 12px; overflow-x: auto; color: #a5d6a7; margin: 8px 0; }
+        .flow-diagram { background: #0f3460; padding: 14px; border-radius: 8px;
+                        font-family: monospace; font-size: 12px; color: #82b1ff;
+                        white-space: pre; line-height: 1.6; margin: 8px 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>WebSocket + STOMP Demo</h1>
+    <p class="subtitle">Spring Boot 3.4.1 · Real-time Chat · Raw WS · STOMP Pub/Sub</p>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('stomp')">STOMP Chat</button>
+        <button class="tab" onclick="switchTab('raw')">Raw WebSocket</button>
+        <button class="tab" onclick="switchTab('concepts')">Concepts</button>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- STOMP CHAT PANEL                                             -->
+    <!-- ============================================================ -->
+    <div id="stomp-panel" class="panel active">
+        <div class="chat-card">
+            <div class="status-bar">
+                <div class="dot" id="stompDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+
+            <!-- Step 1: join with a username -->
+            <div class="join-form" id="joinForm">
+                <input type="text" id="usernameInput" placeholder="Enter your username" maxlength="20">
+                <button onclick="connectStomp()">Join Chat</button>
+            </div>
+
+            <!-- Step 2: message list -->
+            <div id="messages"></div>
+
+            <!-- Step 3: send messages -->
+            <div class="send-form">
+                <input type="text" id="messageInput" placeholder='Type a message… (prefix @name for private)' disabled>
+                <button id="sendBtn" onclick="sendStompMessage()" disabled>Send</button>
+                <button class="secondary" id="leaveBtn" onclick="disconnectStomp()" disabled>Leave</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- RAW WEBSOCKET PANEL                                          -->
+    <!-- ============================================================ -->
+    <div id="raw-panel" class="panel">
+        <div class="raw-card">
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <button onclick="connectRaw()">Connect</button>
+                <button class="secondary" onclick="disconnectRaw()">Disconnect</button>
+            </div>
+            <div id="rawMessages"></div>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="rawInput" placeholder="Type a raw message…">
+                <button onclick="sendRaw()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- CONCEPTS PANEL                                               -->
+    <!-- ============================================================ -->
+    <div id="concepts-panel" class="panel">
+        <div class="concepts-card">
+
+            <h2>1. HTTP vs WebSocket</h2>
+            <p>HTTP is <strong>half-duplex request/response</strong>: the client always initiates.
+            WebSocket is <strong>full-duplex</strong>: either side can send at any time over a single TCP connection.</p>
+
+            <div class="flow-diagram">HTTP (polling):
+  Client ──GET /messages──► Server ──200 OK──► Client   (repeat every 2s)
+
+WebSocket (persistent):
+  Client ──HTTP Upgrade──► Server   (one-time handshake)
+  Client ◄──────────────── Server   (server pushes freely)
+  Client ──────────────── ► Server   (client sends freely)</div>
+
+            <h2>2. WebSocket Handshake</h2>
+            <p>The connection starts as HTTP and upgrades via the <code>Upgrade: websocket</code> header:</p>
+            <pre class="code">GET /stomp-ws HTTP/1.1
+Host: localhost:8080
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZQ==
+Sec-WebSocket-Version: 13
+
+--- Server responds ---
+HTTP/1.1 101 Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPL…</pre>
+
+            <h2>3. STOMP Protocol</h2>
+            <p>STOMP is a text-based sub-protocol that runs <em>inside</em> the WebSocket connection.
+            It adds <strong>destinations</strong> (named channels), <strong>commands</strong> (CONNECT, SEND, SUBSCRIBE, DISCONNECT), and <strong>headers</strong>.</p>
+
+            <h3>STOMP Frame structure</h3>
+            <pre class="code">COMMAND
+header1:value1
+header2:value2
+
+Body (optional)^@</pre>
+
+            <h3>Key STOMP Commands</h3>
+            <pre class="code">CONNECT              ← client opens a STOMP session
+CONNECTED            ← server acks the CONNECT
+SEND                 ← client publishes to a destination
+SUBSCRIBE            ← client registers interest in a destination
+MESSAGE              ← server delivers a message to a subscriber
+UNSUBSCRIBE          ← client cancels a subscription
+DISCONNECT           ← client closes the STOMP session
+ERROR                ← server signals an error</pre>
+
+            <h3>Real STOMP SEND frame</h3>
+            <pre class="code">SEND
+destination:/app/chat.sendMessage
+content-type:application/json
+content-length:48
+
+{"sender":"Alice","content":"Hello!","type":"CHAT"}
+^@</pre>
+
+            <h2>4. Spring Destination Prefixes</h2>
+            <div class="flow-diagram">Client SEND to /app/chat.sendMessage
+    → Spring routes to @MessageMapping("/chat.sendMessage")
+    → Controller logic runs
+    → @SendTo("/topic/public") publishes result to broker
+
+Client SEND to /topic/public  (bypasses controller, goes straight to broker)
+    → Not recommended for untrusted input
+
+/user/{name}/queue/private   ← server-to-user private messaging</div>
+
+            <h2>5. In-Memory Broker vs External Broker</h2>
+            <pre class="code">// In-memory (this demo):
+registry.enableSimpleBroker("/topic", "/queue");
+
+// Production — relay to RabbitMQ/ActiveMQ:
+registry.enableStompBrokerRelay("/topic", "/queue")
+        .setRelayHost("localhost")
+        .setRelayPort(61613);   // STOMP port on RabbitMQ</pre>
+
+            <h2>6. SockJS Fallback</h2>
+            <p>SockJS tries WebSocket first, then falls back to HTTP-based transports
+            (xhr-streaming, xhr-polling, iframe) if WebSocket is blocked by a proxy.
+            Spring Boot serves the SockJS endpoint automatically when you call
+            <code>.withSockJS()</code> in the config.</p>
+
+            <h2>7. Heartbeats</h2>
+            <p>STOMP supports heartbeat negotiation. The server declares its send/receive
+            intervals in the CONNECTED frame. Both sides then ping each other so dead
+            connections are detected quickly.</p>
+            <pre class="code">CONNECTED
+version:1.2
+heart-beat:10000,10000   ← send every 10s, expect every 10s</pre>
+        </div>
+    </div>
+</div>
+
+<!--
+    SockJS  — WebSocket emulation library (served by Spring Boot automatically)
+    STOMP.js — STOMP client that runs on top of SockJS/WebSocket
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+// ============================================================
+// Tab switching
+// ============================================================
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(name + '-panel').classList.add('active');
+    event.target.classList.add('active');
+}
+
+// ============================================================
+// STOMP Chat
+// ============================================================
+let stompClient = null;
+let username = null;
+
+function setConnected(connected) {
+    const dot = document.getElementById('stompDot');
+    const status = document.getElementById('statusText');
+    dot.className = 'dot' + (connected ? ' connected' : '');
+    status.textContent = connected ? 'Connected as ' + username : 'Disconnected';
+    document.getElementById('joinForm').style.display = connected ? 'none' : 'flex';
+    document.getElementById('messageInput').disabled = !connected;
+    document.getElementById('sendBtn').disabled = !connected;
+    document.getElementById('leaveBtn').disabled = !connected;
+}
+
+function connectStomp() {
+    username = document.getElementById('usernameInput').value.trim();
+    if (!username) { alert('Enter a username first'); return; }
+
+    // SockJS creates the transport (WebSocket or fallback)
+    const socket = new SockJS('/stomp-ws');
+
+    // Stomp.over() wraps SockJS as a STOMP transport
+    stompClient = Stomp.over(socket);
+    stompClient.debug = null; // suppress console spam
+
+    stompClient.connect({}, function(frame) {
+        setConnected(true);
+        console.log('Connected: ' + frame);
+
+        // Subscribe to the public topic
+        stompClient.subscribe('/topic/public', function(message) {
+            showMessage(JSON.parse(message.body));
+        });
+
+        // Subscribe to private messages for this user
+        stompClient.subscribe('/user/queue/private', function(message) {
+            showMessage(JSON.parse(message.body));
+        });
+
+        // Send JOIN notification
+        stompClient.send('/app/chat.addUser', {},
+            JSON.stringify({ sender: username, type: 'JOIN' }));
+    });
+}
+
+function sendStompMessage() {
+    const input = document.getElementById('messageInput');
+    const content = input.value.trim();
+    if (!content || !stompClient) return;
+
+    // Determine destination: private (@user msg) or public
+    const destination = content.startsWith('@') ? '/app/chat.private' : '/app/chat.sendMessage';
+
+    stompClient.send(destination, {},
+        JSON.stringify({ sender: username, content: content, type: 'CHAT' }));
+    input.value = '';
+}
+
+function disconnectStomp() {
+    if (stompClient) {
+        stompClient.disconnect();
+        stompClient = null;
+    }
+    setConnected(false);
+}
+
+function showMessage(msg) {
+    const container = document.getElementById('messages');
+    const div = document.createElement('div');
+    const typeClass = msg.type ? msg.type.toLowerCase() : 'chat';
+    div.className = 'msg ' + typeClass;
+    div.innerHTML = '<span class="sender">' + escapeHtml(msg.sender) + '</span>: '
+                  + escapeHtml(msg.content || '');
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendStompMessage();
+});
+
+// ============================================================
+// Raw WebSocket
+// ============================================================
+let rawWs = null;
+
+function connectRaw() {
+    rawWs = new WebSocket('ws://' + location.host + '/raw-ws');
+
+    rawWs.onopen = () => {
+        appendRaw('Connected to Raw WebSocket', 'info');
+    };
+    rawWs.onmessage = (event) => {
+        appendRaw('RECV: ' + event.data, 'recv');
+    };
+    rawWs.onclose = () => {
+        appendRaw('Connection closed', 'info');
+    };
+    rawWs.onerror = (err) => {
+        appendRaw('Error: ' + err, 'info');
+    };
+}
+
+function disconnectRaw() {
+    if (rawWs) { rawWs.close(); rawWs = null; }
+}
+
+function sendRaw() {
+    const input = document.getElementById('rawInput');
+    const msg = input.value.trim();
+    if (!msg || !rawWs) return;
+    rawWs.send(msg);
+    appendRaw('SENT: ' + msg, 'sent');
+    input.value = '';
+}
+
+function appendRaw(text, cls) {
+    const div = document.createElement('div');
+    div.className = 'raw-entry ' + cls;
+    div.textContent = text;
+    const container = document.getElementById('rawMessages');
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+document.getElementById('rawInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendRaw();
+});
+
+// ============================================================
+// XSS safety
+// ============================================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+}
+</script>
+</body>
+</html>

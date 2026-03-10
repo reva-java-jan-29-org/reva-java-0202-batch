@@ -39,6 +39,7 @@ public class RawWebSocketConfig implements WebSocketConfigurer {
         registry
             // Register our handler at /raw-ws
             .addHandler(rawWebSocketHandler, "/raw-ws")
+        
             // Allow all origins so the browser demo page works without CORS errors
             .setAllowedOrigins("*");
 
