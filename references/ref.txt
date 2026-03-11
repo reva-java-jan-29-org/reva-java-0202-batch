@@ -3122,3 +3122,507 @@ Important properties in the business services that fetch configuration
             /actuator/beans 
             /actuator/env 
             /actuator/mappings 
+
+
+    **IMP: Interservice Communication 
+    --------------------------------------
+    1. Big picture: how one service calls another
+
+        - communication is usually REST over HTTP.
+
+    2. Example scenario
+
+        Assume product-service exposes this endpoint:
+
+        @RestController
+        @RequestMapping("/products")
+        public class ProductController {
+
+            @GetMapping("/{id}")
+            public ProductResponse getProductById(@PathVariable Long id) {
+                return new ProductResponse(id, "Laptop", 75000.0, true);
+            }
+        }
+
+        DTO:
+
+        public record ProductResponse(
+                Long id,
+                String name,
+                Double price,
+                boolean inStock
+        ) {}
+
+        Now order-service needs to call:
+
+        GET http://localhost:8081/products/1
+
+        Let’s see how that is done with each client.
+
+        3. RestTemplate
+       
+            RestTemplate is Spring’s classic synchronous HTTP client. The official docs describe it as a high-level API over HTTP client libraries, and its Javadoc calls it a synchronous client.
+
+            “Synchronous” means:
+
+             your thread sends the request
+
+            waits for the response
+
+            only then continues
+
+            So if order-service calls product-service, the calling thread blocks until the response comes back.
+
+        Dependency
+
+        In many Spring MVC apps, RestTemplate support is already available through Spring Web. You usually just define a bean.
+
+        Config
+        @Configuration
+        public class RestTemplateConfig {
+
+            @Bean
+            public RestTemplate restTemplate() {
+                return new RestTemplate();
+            }
+        }
+        Usage in order-service
+        @Service
+        public class OrderService {
+
+            private final RestTemplate restTemplate;
+
+            public OrderService(RestTemplate restTemplate) {
+                this.restTemplate = restTemplate;
+            }
+
+            public ProductResponse fetchProduct(Long productId) {
+                String url = "http://localhost:8081/products/" + productId;
+                return restTemplate.getForObject(url, ProductResponse.class);
+            }
+        }
+        If you want full response details
+        public ProductResponse fetchProduct(Long productId) {
+            String url = "http://localhost:8081/products/" + productId;
+
+            ResponseEntity<ProductResponse> response =
+                    restTemplate.getForEntity(url, ProductResponse.class);
+
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new RuntimeException("Failed to fetch product");
+            }
+
+            return response.getBody();
+        }
+        POST example
+
+        If order-service wants to send something to another service:
+
+        OrderValidationRequest request = new OrderValidationRequest(productId, quantity);
+
+        ResponseEntity<ValidationResponse> response =
+                restTemplate.postForEntity(
+                        "http://localhost:8081/products/validate",
+                        request,
+                        ValidationResponse.class
+                );
+        When to use RestTemplate
+
+            Use it when:
+
+            your app is traditional Spring MVC
+
+            your use case is simple
+
+            you want straightforward blocking code
+
+            you are learning service communication first
+
+        Limitations
+
+            RestTemplate is older. Spring’s newer direction is toward WebClient and newer REST client APIs. In current Spring docs, WebClient is positioned as the newer alternative for non-blocking and broader scenarios. RestTemplate remains widely understood and still usable in many existing projects.
+
+        4. WebClient
+            
+            WebClient is Spring’s non-blocking reactive HTTP client. The official docs describe it as non-blocking and reactive, with support for synchronous, asynchronous, and streaming scenarios.
+
+            This means:
+
+                it is designed for reactive programming
+
+                it can work with Mono and Flux
+
+                it scales better for high concurrency
+
+                it supports non-blocking I/O
+
+        Dependency
+
+        Usually via Spring WebFlux.
+
+        Config
+        @Configuration
+        public class WebClientConfig {
+
+            @Bean
+            public WebClient webClient(WebClient.Builder builder) {
+                return builder
+                        .baseUrl("http://localhost:8081")
+                        .build();
+            }
+        }
+
+        Spring’s docs note that WebClient can be created with create(...) or builder(), and the builder supports base URL, default headers, and other options.
+
+        Usage in order-service
+        @Service
+        public class OrderService {
+
+            private final WebClient webClient;
+
+            public OrderService(WebClient webClient) {
+                this.webClient = webClient;
+            }
+
+            public ProductResponse fetchProduct(Long productId) {
+                return webClient
+                        .get()
+                        .uri("/products/{id}", productId)
+                        .retrieve()
+                        .bodyToMono(ProductResponse.class)
+                        .block();
+            }
+        }
+        Important point about .block()
+
+        This code uses WebClient, but then calls:
+
+        .block()
+
+        That means:
+
+            the HTTP client is reactive
+
+            but your method becomes blocking again
+
+            This is common in regular Spring MVC apps when you want to use WebClient without converting your whole app to reactive style.
+
+        Fully reactive style
+        public Mono<ProductResponse> fetchProductReactive(Long productId) {
+            return webClient
+                    .get()
+                    .uri("/products/{id}", productId)
+                    .retrieve()
+                    .bodyToMono(ProductResponse.class);
+        }
+
+        Now the method returns a Mono<ProductResponse> and stays non-blocking.
+
+        Error handling example
+        public ProductResponse fetchProduct(Long productId) {
+            return webClient
+                    .get()
+                    .uri("/products/{id}", productId)
+                    .retrieve()
+                    .onStatus(
+                            status -> status.is4xxClientError(),
+                            response -> Mono.error(new RuntimeException("Product not found"))
+                    )
+                    .onStatus(
+                            status -> status.is5xxServerError(),
+                            response -> Mono.error(new RuntimeException("Product service error"))
+                    )
+                    .bodyToMono(ProductResponse.class)
+                    .block();
+        }
+       
+        When to use WebClient
+
+            Use it when:
+
+            you want the modern Spring HTTP client
+
+            you need better scalability under load
+
+            you want async/reactive support
+
+            you may later adopt reactive pipelines
+
+        Practical advice for your case
+
+            If your product-service and order-service are both normal Spring MVC / JPA apps, you can still use WebClient, but if you immediately call .block(), the main benefit becomes API modernity and flexibility, not full reactive scalability.
+
+        5. OpenFeign
+    
+    
+            OpenFeign is a declarative HTTP client. Spring Cloud OpenFeign docs describe Feign exactly that way: you create an interface and annotate it, and Spring generates the client implementation for you.
+
+            This is why many microservice teams like it:
+
+            less boilerplate
+
+            client code looks like controller method signatures
+
+            very readable
+
+        Dependency
+
+        For Spring Cloud OpenFeign you add the OpenFeign starter from Spring Cloud. The official Spring Cloud OpenFeign docs describe it as integration for Spring Boot apps through autoconfiguration and Spring Environment binding.
+
+        Enable Feign clients
+        @SpringBootApplication
+        @EnableFeignClients
+        public class OrderServiceApplication {
+            public static void main(String[] args) {
+                SpringApplication.run(OrderServiceApplication.class, args);
+            }
+        }
+        Define the client
+        @FeignClient(name = "product-service", url = "http://localhost:8081")
+        public interface ProductClient {
+
+            @GetMapping("/products/{id}")
+            ProductResponse getProductById(@PathVariable("id") Long id);
+        }
+        Use it in order-service
+        @Service
+        public class OrderService {
+
+            private final ProductClient productClient;
+
+            public OrderService(ProductClient productClient) {
+                this.productClient = productClient;
+            }
+
+            public ProductResponse fetchProduct(Long productId) {
+                return productClient.getProductById(productId);
+            }
+        }
+
+        This is the main attraction:
+            you write an interface, and Spring/OpenFeign handles the HTTP call.
+
+        POST example
+        @FeignClient(name = "product-service", url = "http://localhost:8081")
+        public interface ProductClient {
+
+            @PostMapping("/products/validate")
+            ValidationResponse validateProduct(@RequestBody OrderValidationRequest request);
+        }
+        
+        When to use OpenFeign
+
+            Use it when:
+
+                you are building microservices
+
+                you want clean declarative clients
+
+                you prefer less manual HTTP code
+
+                your app is not primarily reactive
+
+                Important compatibility note
+
+                Because OpenFeign comes from Spring Cloud, you must use a Spring Cloud release that is compatible with your Spring Boot version. Spring Cloud publishes compatibility properties and version alignment guidance.
+
+        6. Side-by-side mental model
+        
+        RestTemplate
+
+            You manually say:
+
+            call this URL
+
+            send this body
+
+            map to this class
+
+            It is explicit and simple.
+
+        WebClient
+
+            You build a fluent HTTP pipeline:
+
+            request
+
+            retrieve
+
+            map body
+
+            optional reactive composition
+
+            It is the modern flexible client.
+
+        OpenFeign
+
+            You define an interface:
+
+            “this interface represents product-service”
+
+            framework generates the HTTP client
+
+            It is the cleanest for many microservice codebases.
+
+        7. Which one should you choose?
+
+            For your case — Spring Boot 3.2, product-service, order-service, probably JPA and regular REST APIs — here is the practical answer:
+
+        Pick RestTemplate if:
+
+            you are learning basics first
+
+            you want the easiest mental model
+
+            you want to understand raw service-to-service flow clearly
+
+        Pick WebClient if:
+
+            you want the modern Spring client
+
+            you may need async/reactive later
+
+            you want more control and flexibility
+
+        Pick OpenFeign if:
+
+            you are building a real microservice architecture
+
+            you want the cleanest developer experience
+
+            you want your service clients to look declarative and maintainable
+
+        Recommendation
+
+            For two business services in a standard Spring Boot microservices project, the most practical choice is usually:
+
+                OpenFeign for day-to-day service calls
+
+                WebClient when you need more advanced control, streaming, or reactive behavior
+
+                RestTemplate is still useful for learning and for older codebases, but for new microservice development I would not make it the first choice.
+
+        8. Example real business flow with order-service
+
+        Suppose order-service receives:
+
+        {
+        "productId": 101,
+        "quantity": 2
+        }
+
+        Then the logic is:
+
+        public OrderResponse createOrder(CreateOrderRequest request) {
+            ProductResponse product = productClient.getProductById(request.productId());
+
+            if (!product.inStock()) {
+                throw new RuntimeException("Product is out of stock");
+            }
+
+            // calculate order
+            double total = product.price() * request.quantity();
+
+            // save order in DB
+            // return response
+        }
+
+        This is exactly how services commonly collaborate:
+        one service owns its own data, and another service calls it instead of directly reading its database.
+
+        That last point is important:
+        order-service should call product-service, not query product-service’s database directly.
+
+        9. Important best practices
+        Do not directly access another service’s database
+
+        Each microservice should own its database boundary.
+
+        Use DTOs for API communication
+
+        Do not expose internal JPA entities directly between services.
+
+        Handle timeouts and failures
+
+        Service-to-service communication can fail. Add:
+
+        timeout settings
+
+        retries where appropriate
+
+        circuit breakers in larger systems
+
+        Spring Cloud includes patterns around service-to-service calls, load balancing, and circuit breakers in the broader ecosystem.
+
+        Prefer service discovery in real microservices
+
+        Today you may use:
+
+        http://localhost:8081
+
+        Later with Eureka / discovery you would call by service name rather than hardcoded host/port.
+
+        Be careful with synchronous chains
+
+        If order-service calls product-service, which calls inventory-service, which calls payment-service, latency and failure risk increase quickly.
+
+        10. One clean example for each
+        RestTemplate
+        @Service
+        public class ProductGateway {
+
+            private final RestTemplate restTemplate;
+
+            public ProductGateway(RestTemplate restTemplate) {
+                this.restTemplate = restTemplate;
+            }
+
+            public ProductResponse getProduct(Long id) {
+                return restTemplate.getForObject(
+                        "http://localhost:8081/products/" + id,
+                        ProductResponse.class
+                );
+            }
+        }
+        WebClient
+        @Service
+        public class ProductGateway {
+
+            private final WebClient webClient;
+
+            public ProductGateway(WebClient.Builder builder) {
+                this.webClient = builder.baseUrl("http://localhost:8081").build();
+            }
+
+            public ProductResponse getProduct(Long id) {
+                return webClient.get()
+                        .uri("/products/{id}", id)
+                        .retrieve()
+                        .bodyToMono(ProductResponse.class)
+                        .block();
+            }
+        }
+        OpenFeign
+        @FeignClient(name = "product-service", url = "http://localhost:8081")
+        public interface ProductClient {
+
+            @GetMapping("/products/{id}")
+            ProductResponse getProduct(@PathVariable("id") Long id);
+        }
+        @Service
+        public class ProductGateway {
+
+            private final ProductClient productClient;
+
+            public ProductGateway(ProductClient productClient) {
+                this.productClient = productClient;
+            }
+
+            public ProductResponse getProduct(Long id) {
+                return productClient.getProduct(id);
+            }
+        }
+        11. Final takeaway
+
+        A Spring service communicates with another service usually by making HTTP calls to that service’s REST endpoints. In your case, order-service can call product-service to fetch product details before creating an order. RestTemplate does this with a classic synchronous template API, WebClient does it with a newer fluent non-blocking API, and OpenFeign does it declaratively through annotated interfaces. For a typical Spring Boot microservices setup, OpenFeign is usually the cleanest choice, while WebClient is the modern flexible choice, especially if you need reactive or advanced client behavior.
+        

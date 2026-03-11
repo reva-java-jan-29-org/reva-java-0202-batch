@@ -13,6 +13,7 @@ import com.ecommerce.dto.PlaceOrderRequest;
 import com.ecommerce.entity.Cart;
 import com.ecommerce.entity.Order;
 import com.ecommerce.entity.OrderItem;
+import com.ecommerce.feign.ProductServiceClient;
 import com.ecommerce.repository.CartRepository;
 import com.ecommerce.repository.OrderRepository;
 
@@ -29,6 +30,9 @@ public class OrderService {
 
     @Autowired
     private CartService cartService;
+    
+    @Autowired
+    private ProductServiceClient productServiceClient;
 
     @Transactional
     public OrderDto placeOrder(Long userId, PlaceOrderRequest request) {
@@ -47,7 +51,7 @@ public class OrderService {
 
         for (var cartItem : cart.getItems()) {
             // Reduce stock via OpenFeign
-//            productServiceClient.reduceStock(cartItem.getProductId(), cartItem.getQuantity());
+            productServiceClient.reduceStock(cartItem.getProductId(), cartItem.getQuantity());
 
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(order);
@@ -87,7 +91,7 @@ public class OrderService {
     private OrderDto toDto(Order order) {
         OrderDto dto = new OrderDto();
         dto.setId(order.getId());
-        dto.setUserId(order.getCustomerId());
+        dto.setCustomerId(order.getCustomerId());
         dto.setTotalAmount(order.getTotalAmount());
         dto.setStatus(order.getStatus().name());
         dto.setShippingAddress(order.getShippingAddress());

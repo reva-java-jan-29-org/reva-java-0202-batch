@@ -14,6 +14,7 @@ import com.ecommerce.dto.CartItemRequest;
 import com.ecommerce.dto.ProductDto;
 import com.ecommerce.entity.Cart;
 import com.ecommerce.entity.CartItem;
+import com.ecommerce.feign.ProductServiceClient;
 import com.ecommerce.repository.CartRepository;
 
 @Service
@@ -22,7 +23,8 @@ public class CartService {
 	@Autowired
 	private CartRepository cartRepository;
 
-
+	@Autowired
+	private ProductServiceClient productServiceClient;
 
 	public CartDto getCart(Long userId) {
 		Cart cart = cartRepository.findByCustomerId(userId).orElseGet(() -> createNewCart(userId));
@@ -30,8 +32,10 @@ public class CartService {
 	}
 
 	public CartDto addToCart(Long userId, CartItemRequest request) {
+		
 		// Fetch product info via OpenFeign
-//		ProductDto product = productServiceClient.getProductById(request.getProductId());
+		ProductDto product = productServiceClient.getProductById(request.getProductId());
+		
 
 		Cart cart = cartRepository.findByCustomerId(userId).orElseGet(() -> createNewCart(userId));
 

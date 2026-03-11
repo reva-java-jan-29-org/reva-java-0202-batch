@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class OrderDto {
     private Long id;
-    private Long userId;
+    private Long customerId;
     private List<CartItemDto> items;
     private BigDecimal totalAmount;
     private String status;
