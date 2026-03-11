@@ -29,7 +29,8 @@ public class SecurityConfig {
 
 		http.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll()).httpBasic(basic -> basic.disable())
+				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+				.httpBasic(basic -> basic.disable())
 				.formLogin(formlogin -> formlogin.disable());
 
 		return http.build();
