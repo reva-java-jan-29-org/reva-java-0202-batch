@@ -3164,12 +3164,9 @@ Important properties in the business services that fetch configuration
             RestTemplate is Spring’s classic synchronous HTTP client. The official docs describe it as a high-level API over HTTP client libraries, and its Javadoc calls it a synchronous client.
 
             “Synchronous” means:
-
-             your thread sends the request
-
-            waits for the response
-
-            only then continues
+                - your thread sends the HTTP request to the given url
+                - waits for the response
+                - only then continues to the next line
 
             So if order-service calls product-service, the calling thread blocks until the response comes back.
 
@@ -3214,6 +3211,7 @@ Important properties in the business services that fetch configuration
 
             return response.getBody();
         }
+        
         POST example
 
         If order-service wants to send something to another service:
@@ -3353,8 +3351,7 @@ Important properties in the business services that fetch configuration
             If your product-service and order-service are both normal Spring MVC / JPA apps, you can still use WebClient, but if you immediately call .block(), the main benefit becomes API modernity and flexibility, not full reactive scalability.
 
         5. OpenFeign
-    
-    
+        
             OpenFeign is a declarative HTTP client. Spring Cloud OpenFeign docs describe Feign exactly that way: you create an interface and annotate it, and Spring generates the client implementation for you.
 
             This is why many microservice teams like it:
@@ -3625,4 +3622,3 @@ Important properties in the business services that fetch configuration
         11. Final takeaway
 
         A Spring service communicates with another service usually by making HTTP calls to that service’s REST endpoints. In your case, order-service can call product-service to fetch product details before creating an order. RestTemplate does this with a classic synchronous template API, WebClient does it with a newer fluent non-blocking API, and OpenFeign does it declaratively through annotated interfaces. For a typical Spring Boot microservices setup, OpenFeign is usually the cleanest choice, while WebClient is the modern flexible choice, especially if you need reactive or advanced client behavior.
-        
