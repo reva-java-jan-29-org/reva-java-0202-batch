@@ -2521,6 +2521,8 @@ Functional Interface
 
             @Entity 
             @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+            OR 
+            @MappedSuperclass
             class User {
 
                 @Id 
@@ -2549,9 +2551,7 @@ Functional Interface
             user_tb
             --------------
             id    username.   password.     role            
-            1       vishal      ..          Customer        
-            2       Rishav      ...         SUPPLIER      
-
+          
 
             customer_tb 
             id    username.   password.     role     city       country 
@@ -2560,7 +2560,7 @@ Functional Interface
 
             supplier_tb 
             id    username.   password.     role.  supplierCode
-              
+            2
 
 
 
@@ -2883,30 +2883,242 @@ Authorization layer	Check roles/permissions
             - you can run the project as "spring boot project" using maven command 
                     mvn spring-boot:run 
 
+    **Environment object in Spring 
+    -----------------------------------
+        - Environment object represents the current environment in which the application is running  
+        - Spring Environment unifies the configuration for spring based applications 
+
+        - Environment object 
+            - read configuration properities 
+            - determines/manages active profiles 
+
+        - Configuration can come from different source 
+            - application.properties or application.yml 
+            - system properties 
+            - environment variables 
+            - command line arguments 
+            - Config Server (in case of microservices architecture)
+            - kubernetes configMap
+            - Vault i.e. Hashicorp vault 
+
+        - Property Resolution Order 
+            - command line arguments 
+            - system properties 
+            - environment variables 
+            - application.properties
+            - default properties 
+        
+                   
+
     
 
+    ***IMP: Config-Server 
+    ----------------------------
+    What a Config Server is
+        - A Config Server is a Spring Boot application that exposes configuration over HTTP.
+        - It usually reads configuration from an external repository such as Git / vault services and serves it to business services 
+            like user-service, product-service, and order-service. 
+        - The server is enabled in a Spring Boot app with @EnableConfigServer.
+       
+        The main idea is:
+            - config-server stores or reads the source of truth for configuration
+            - business services fetch their configuration from it at startup
+            - profiles and labels let you separate environments such as dev, qa, prod
+            - using the "Environment" object we can read the configuration properties programmatically
+            - the configuration returned by the config-server is added into the client service’s Environment as property sources.
 
 
-    **Project1: SIST 
-        @Entity                                                             @Entity 
-        public class Product {                                              public class Inventory {
-            @Id                                                                     @Id 
-            private Long productId;                                                 private Long id;
-            private String sku;                                                     private int quantity
-            private String name;
-            private String category;
-            private BigDecimal price;
-            private boolean active;
+        - Why Config Server matters in microservices
+            Without Config Server, each service has its own application.properties or application.yml, and you end up duplicating values like database URLs, Eureka URLs, API keys, logging levels, feature flags, and profile-specific settings. Config Server centralizes that so multiple services can share and override configuration cleanly per environment.
+            
+            For example, in an e-commerce system:
+                - user-service may need DB and JWT settings
+                - product-service may need DB and cache settings
+                - order-service may need DB, messaging, and payment settings
+                - api-gateway may need route definitions
+                - eureka-server may need registry-specific properties
 
-            @OneToOne(fetch = ?, cascade = ? )
-            Inventory inventory;
+            **IMP: Instead of hardcoding those inside each app, they can be stored centrally and resolved by application name and 
+                active profile. Spring Cloud Config maps these concepts to Spring’s Environment and PropertySource model.
 
-        }                                                                     }
+        Important learning points for building a Config Server
+
+        1. Understand the architecture first
+            You should be clear on the two sides:
+            Server side
+                - hosts centralized configuration
+                - exposes config through HTTP endpoints
+                - often reads from Git or can read from vault services 
 
 
-        Order                                   OrderItem 
+            Client side
+                - business services connect to the config server
+                - fetch remote properties during startup
+                - merge those properties into their Spring Environment.
+
+            If this architecture is not clear, the code will feel magical instead of logical.
+
+    2. Learn how config is resolved by application name, profile, and label
+
+        This is one of the most important concepts.
+        Config Server resolves properties using:
+            - application name
+            - active profile
+            - label (often Git branch/tag)
+
+
+            So if a service has:
+                spring.application.name=user-service
+                spring.profiles.active=dev
+            the config server will look for config matching user-service and dev, following Spring-style resolution rules. That is the foundation of how one config server serves many business services and environments.
+
+    3. Learn the source of configuration
+
+        A Config Server usually reads from an environment repository. Git is the most common backend because it gives:
+            - versioning
+            - history
+            - rollback
+            - branch-based environment separation.
+
+        So one important learning goal is not just “how to create a server,” but “how the server reads from Git and maps repository files to service configuration.”
+
+4. Learn bootstrap/config-first behavior on the client side
+    Spring Cloud applications use a bootstrap phase / parent context to load external configuration before the main application context is fully built. That bootstrap context is responsible for loading external properties and decrypting local external configuration when applicable.
+    That is why config client setup is different from ordinary property loading. Conceptually, the client needs the remote configuration before the application fully starts, because values like datasource URL, ports, and Eureka endpoints may depend on it.
+
+5. Learn precedence and overrides
+    A critical topic is: which value wins when the same property exists in multiple places?
+        Spring Cloud Config supports override behavior, and the docs explicitly mention properties such as:
+            spring.cloud.config.allowOverride=true
+            spring.cloud.config.overrideNone=true
+
+        to control whether local client settings may override remote config. This matters a lot when debugging “why is my service still using the old value?”
+
+6. Learn actuator and health for config client and config server
+        This is important in real systems.
+        The Config Client provides a health indicator that attempts to load configuration from the Config Server. It can be disabled with:
+        management.health.config.enabled=false
+        and its response is cached by default; the cache TTL can be changed with:
+        health.config.time-to-live
+        Those are very practical properties when monitoring whether clients are successfully talking to the config server.
+        Also, Spring Cloud Config’s own docs warn that if Actuator is not included on the config server, requests to paths like /actuator/health may accidentally match config server API patterns such as /{application}/{label}, which is a subtle but important security/operations detail.
+        Core setup of a Config Server
+
+A minimal Config Server needs:
+    
+    Spring Boot app
+
+
+    Spring Cloud Config Server dependency
+
+
+    @EnableConfigServer
+        - properties telling it where to read configuration from.
+
+
+    Main class
+    @SpringBootApplication
+    @EnableConfigServer
+    public class ConfigServerApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServerApplication.class, args);
+    }
+    }
+That annotation is the key server-side switch.
+
+Important properties in config-server
+    These are the properties you should understand first.
+    server.port
+        Defines the port on which the config server runs.
+    
+    Example:
+    server.port=8888
+    8888 is a common convention for config server in demos and training, though not mandatory.
+    
+    spring.application.name
+        Names the config server application.
+        Example:
+        spring.application.name=config-server
+    
+    spring.cloud.config.server.git.uri
+        Tells the config server where the Git repository is.
+
+        Example:
+        spring.cloud.config.server.git.uri=https://github.com/your-org/config-repo
+        This is one of the most important properties because it defines the remote configuration source. The Config Server supports an HTTP resource-based API while sourcing those values from repositories such as Git.
+
+    spring.cloud.config.server.git.default-label
+    Defines the default Git label/branch to use when the client does not request one explicitly.
+    Example:
+    
+    spring.cloud.config.server.git.default-label=main
+        This matters if your Git repo uses main instead of master.
+
+    spring.cloud.config.server.git.search-paths
+        Lets the config server look inside specific folders in the Git repo.
+        Example:
+        spring.cloud.config.server.git.search-paths=configs,shared
+        Useful when your config repo is organized into directories.
+
+    spring.cloud.config.server.git.username
+    spring.cloud.config.server.git.password
+        Used when the Git repo is private.
+        Example:
+        spring.cloud.config.server.git.username=your-user
+        spring.cloud.config.server.git.password=your-token
+
+        In practice, for private repos you would usually externalize these securely instead of hardcoding them.
+
+    management.endpoints.web.exposure.include
+        Important when you want actuator endpoints available on the config server.
+        Example:
+        management.endpoints.web.exposure.include=health,info
+        Actuator endpoints are the standard way to monitor Spring Boot services.
+
+    management.endpoint.health.show-details
+        Useful for seeing detailed health info.
+            Example:
+            management.endpoint.health.show-details=always
+            Spring Boot’s health endpoint is /actuator/health, and it can also expose component-level health.
+
+
+    Important files in the Git config repository
+        This is where many learners get confused. The config server does not usually hold every property directly inside its own application.properties. Instead, it often points to a separate config repository that contains files such as:
+            - application.properties
+            - application-dev.properties
+            - user-service.properties
+            - user-service-dev.properties
+            - product-service.properties
+            - order-service.properties
+            - api-gateway.properties
+
+The resolution follows Spring-style conventions by application name and profile, which is why spring.application.name and active profiles on the client matter so much.
+Important properties in the business services that fetch configuration
 
 
 
-        find all the products with stock available 
-        find all the products which are out of stock 
+    **Now the client side
+    ----------------------
+        Every business service that fetches config from the config server needs to be identifiable and told where the config server is.
+
+            spring.application.name
+                This is mandatory conceptually because the config server uses it to determine which application config to return.
+                Example in user-service:
+                spring.application.name=user-service
+
+                **If this is wrong, the service fetches the wrong config or none at all.
+
+
+
+    Spring Boot Actuator 
+    -------------------------
+        - it provides http endpoints that explose application health and some runtime information about the application 
+        - these endpoints allows to monitor the application 
+
+        - what endpoints it exposes 
+            /actuator/health 
+            /actuator/info 
+            /actuator/metrics 
+            /actuator/beans 
+            /actuator/env 
+            /actuator/mappings 

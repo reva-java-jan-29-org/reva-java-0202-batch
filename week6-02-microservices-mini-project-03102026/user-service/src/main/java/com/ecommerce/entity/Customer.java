@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "customers")
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Customer extends User {

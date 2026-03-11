@@ -1,12 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mvn compile -q)"
+      "Bash(mvn compile -q)",
+      "Read(//Users/vishalshah/**)"
     ],
     "additionalDirectories": [
       "/Users/vishalshah/reva-java-0202-batch/week5-03-spring-web-rest-api-03042026/src/main/java/com/training",
       "/Users/vishalshah/.claude/projects/-Users-vishalshah-reva-java-0202-batch",
-      "/Users/vishalshah/reva-java-0202-batch"
+      "/Users/vishalshah/reva-java-0202-batch",
+      "/Users/vishalshah/reva-java-0202-batch/Exam Notes : Revision"
     ]
   }
 }

@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 
 @MappedSuperclass
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
