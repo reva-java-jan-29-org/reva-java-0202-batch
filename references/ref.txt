@@ -3455,9 +3455,9 @@ Important properties in the business services that fetch configuration
 
             You define an interface:
 
-            “this interface represents product-service”
+                 “this interface represents product-service”
 
-            framework generates the HTTP client
+            OpenFeign framework generates the HTTP client
 
             It is the cleanest for many microservice codebases.
 
@@ -3622,3 +3622,40 @@ Important properties in the business services that fetch configuration
         11. Final takeaway
 
         A Spring service communicates with another service usually by making HTTP calls to that service’s REST endpoints. In your case, order-service can call product-service to fetch product details before creating an order. RestTemplate does this with a classic synchronous template API, WebClient does it with a newer fluent non-blocking API, and OpenFeign does it declaratively through annotated interfaces. For a typical Spring Boot microservices setup, OpenFeign is usually the cleanest choice, while WebClient is the modern flexible choice, especially if you need reactive or advanced client behavior.
+
+
+
+    Spring Core, Web, REST API Development, Spring Boot, JPA, Security, Spring boot, Microservices, Docker, DevOps
+
+
+    **Service Discovery & Registry 
+    --------------------------
+        - Service Discovery: 
+            - when you have multiple services, and the services communicate with each other, hard-coding the target address is not ideal 
+            - the "calling service (order service)" should query the dedicated server to know if the "target service (product-service)" is UP and RUNNING or not, and on what URL/PORT it is running 
+
+        - Service Registry : We can create a dedicated server that acts as a registry for all the microservices 
+
+        - We can implement "Service Discovery & Registry" using "spring-cound-netflix-eureka"
+
+        - Client Side and Server Side Discovery 
+
+            - The caller Service (order service) queries Eureka Server, selects and instance, and calls it directly 
+            
+
+
+    Service A:
+    ------------------
+
+        method: transfer - transfer 1000.00 from account 1 to account 2
+
+        - start the transction 
+            - Debit 1000 from the  account 1
+                - find the account 
+                - reduce the amount and update the db 
+                - update the logs 
+            - Credit 1000 in the  account 2
+                - find the account 
+                - increase the amount and update the db 
+                - update the logs
+        - commit the transaction 

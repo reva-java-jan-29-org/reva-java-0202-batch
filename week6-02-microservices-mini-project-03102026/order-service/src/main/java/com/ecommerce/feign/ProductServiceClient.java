@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ecommerce.dto.ProductDto;
 
-@FeignClient(name="product-service", url="http://localhost:8081")
+@FeignClient(name="product-service")
 public interface ProductServiceClient {
 
 	@GetMapping("/api/products/{id}")

@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.ecommerce.entity.Customer;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -34,18 +36,22 @@ public class JwtService {
 
     // ── Generate Token ────────────────────────────────────────────────────
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(Customer customer) {
         Map<String, Object> extraClaims = new HashMap<>();
         // Add the role as a custom claim in the token payload
-        extraClaims.put("role", userDetails.getAuthorities()
+        extraClaims.put("role", customer.getAuthorities()
                 .iterator().next().getAuthority());
-        return buildToken(extraClaims, userDetails);
+        extraClaims.put("userId", customer.getId());
+        extraClaims.put("firstName", customer.getFirstName());
+        
+        return buildToken(extraClaims, customer);
     }
 
-    private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+    private String buildToken(Map<String, Object> extraClaims, Customer customer) {
+    
         return Jwts.builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername())         // "sub" claim
+                .subject(customer.getUsername())         // "sub" claim
                 .issuedAt(new Date(System.currentTimeMillis()))  // "iat" claim
                 .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs)) // "exp" claim
                 .signWith(getSigningKey())

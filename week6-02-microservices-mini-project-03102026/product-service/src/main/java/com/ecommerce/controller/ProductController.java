@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +28,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+    
+    @Autowired
+    private Environment environment;
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts() {
@@ -35,6 +39,9 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
+    	
+    	System.out.println("Product Service : Port No - "+ environment.getProperty("server.port"));
+    	
         try {
             return ResponseEntity.ok(productService.getProductById(id));
         } catch (RuntimeException e) {
