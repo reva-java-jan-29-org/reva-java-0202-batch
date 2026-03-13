@@ -15,9 +15,10 @@ By the end of this module you will be able to:
 2. Describe the Docker architecture (daemon, client, registry, images, layers)
 3. Install Docker on macOS using Colima (lightweight, free alternative to Docker Desktop)
 4. Write multi-stage Dockerfiles for Spring Boot services
-5. Use Docker Compose to orchestrate the full 6-service stack with MySQL
-6. Build Docker images using the Spring Boot Maven Plugin (`spring-boot:build-image`)
-7. Understand the Jib plugin as a daemon-less alternative for image building
+5. Write Dockerfiles for all 6 microservices and build each image individually
+6. Build Docker images using Dockerfiles, Spring Boot Buildpacks, and Jib — and understand when to use each
+7. Verify all service images are built and ready before orchestration
+8. Use Docker Compose to orchestrate the full 6-service stack with MySQL
 
 ---
 
@@ -431,6 +432,10 @@ WORKDIR /workspace
 COPY pom.xml .
 
 # Copy all child module POMs (needed to resolve the multi-module structure)
+# WHY: Maven reads the entire reactor (all module POMs) to resolve the
+# dependency graph — even when building only one module with -pl.
+# Without sibling POMs, Maven throws "Could not find artifact" errors.
+# Note: only POMs are copied here, NOT the other services' source code.
 COPY config-server/pom.xml    config-server/
 COPY eureka-server/pom.xml    eureka-server/
 COPY api-gateway/pom.xml      api-gateway/
@@ -540,6 +545,11 @@ EXPOSE 8888
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
 ```
 
+```bash
+# Build config-server image (run from project root)
+docker build -f config-server/Dockerfile -t ecommerce/config-server:latest .
+```
+
 ### `eureka-server/Dockerfile`
 
 ```dockerfile
@@ -564,6 +574,11 @@ WORKDIR /app
 COPY --from=build /workspace/eureka-server/target/*.jar app.jar
 EXPOSE 8761
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+```
+
+```bash
+# Build eureka-server image (run from project root)
+docker build -f eureka-server/Dockerfile -t ecommerce/eureka-server:latest .
 ```
 
 ### `user-service/Dockerfile`
@@ -592,6 +607,11 @@ EXPOSE 8081
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
 ```
 
+```bash
+# Build user-service image (run from project root)
+docker build -f user-service/Dockerfile -t ecommerce/user-service:latest .
+```
+
 ### `product-service/Dockerfile`
 
 ```dockerfile
@@ -616,6 +636,11 @@ WORKDIR /app
 COPY --from=build /workspace/product-service/target/*.jar app.jar
 EXPOSE 8082
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+```
+
+```bash
+# Build product-service image (run from project root)
+docker build -f product-service/Dockerfile -t ecommerce/product-service:latest .
 ```
 
 ### `order-service/Dockerfile`
@@ -644,6 +669,11 @@ EXPOSE 8083
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
 ```
 
+```bash
+# Build order-service image (run from project root)
+docker build -f order-service/Dockerfile -t ecommerce/order-service:latest .
+```
+
 ### `api-gateway/Dockerfile`
 
 ```dockerfile
@@ -670,9 +700,253 @@ EXPOSE 8080
 ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
 ```
 
+```bash
+# Build api-gateway image (run from project root)
+docker build -f api-gateway/Dockerfile -t ecommerce/api-gateway:latest .
+```
+
+> **Note:** First build takes 10–20 minutes per service (downloads Maven dependencies and base images). Subsequent builds use cached layers and complete in under a minute.
+
 ---
 
-## 9.7 MySQL Init Script
+## 9.7 Alternative: Spring Boot Buildpacks
+
+Spring Boot 3.x includes a built-in image builder using **Cloud Native Buildpacks (CNB)**. No Dockerfile required — Spring Boot inspects your project and builds an optimized layered image automatically.
+
+### How It Works
+
+```
+mvn spring-boot:build-image
+         │
+         ▼
+Cloud Native Buildpacks
+         │
+         ├─ Detects Java project
+         ├─ Downloads appropriate JRE buildpack
+         ├─ Creates optimized layered image automatically
+         │    Layer 1: JRE runtime
+         │    Layer 2: Spring Boot loader
+         │    Layer 3: Dependencies (changes rarely)
+         │    Layer 4: Application classes (changes often)
+         └─ Pushes to local Docker daemon
+```
+
+### Configuration in `pom.xml`
+
+Add to each service's `pom.xml` (or to the parent `pom.xml` to apply to all):
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <image>
+                    <!-- Image name: ecommerce/user-service:1.0.0 -->
+                    <name>ecommerce/${project.artifactId}:${project.version}</name>
+                    <!-- Also tag as :latest -->
+                    <tags>
+                        <tag>ecommerce/${project.artifactId}:latest</tag>
+                    </tags>
+                    <!-- JVM settings via environment -->
+                    <env>
+                        <BPL_JVM_THREAD_COUNT>50</BPL_JVM_THREAD_COUNT>
+                    </env>
+                </image>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+### Building All 6 Service Images
+
+```bash
+# Build all services from the project root (builds each one sequentially)
+mvn spring-boot:build-image -DskipTests
+
+# Or build a single service
+cd config-server
+mvn spring-boot:build-image -DskipTests
+```
+
+> **Note:** First run downloads buildpacks (~500 MB). Subsequent builds reuse them. Expect 5–10 minutes per service on first run.
+
+**`host.docker.internal`** — if you run a single image standalone (not via Compose), use this special DNS name to connect back to services running on the host machine:
+```bash
+docker run -d \
+  -p 8081:8081 \
+  -e SPRING_CONFIG_IMPORT=optional:configserver:http://host.docker.internal:8888 \
+  ecommerce/user-service:1.0.0
+```
+
+---
+
+## 9.8 Alternative: Jib Maven Plugin
+
+**Jib** (from Google) builds OCI-compliant images without needing a running Docker daemon. It builds directly from Maven and pushes to any registry.
+
+### Why Jib?
+
+- **No Docker daemon required** — works in CI environments without Docker socket access
+- **Faster incremental builds** — changes only the layers that differ
+- **Reproducible builds** — same source always produces the same image
+- **No Dockerfile to maintain**
+
+### Configuration in `pom.xml`
+
+```xml
+<plugin>
+    <groupId>com.google.cloud.tools</groupId>
+    <artifactId>jib-maven-plugin</artifactId>
+    <version>3.4.0</version>
+    <configuration>
+        <from>
+            <image>eclipse-temurin:17-jre-alpine</image>
+        </from>
+        <to>
+            <!-- Push to Docker Hub: docker.io/yourusername/user-service:latest -->
+            <image>docker.io/yourusername/user-service</image>
+            <tags>
+                <tag>latest</tag>
+                <tag>${project.version}</tag>
+            </tags>
+        </to>
+        <container>
+            <ports>
+                <port>8081</port>
+            </ports>
+            <jvmFlags>
+                <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
+                <jvmFlag>-XX:MaxRAMPercentage=75.0</jvmFlag>
+                <jvmFlag>-Xms256m</jvmFlag>
+            </jvmFlags>
+            <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+        </container>
+    </configuration>
+</plugin>
+```
+
+### Building All 6 Service Images
+
+```bash
+# Build and load into local Docker daemon (requires Docker to be running)
+mvn jib:dockerBuild
+
+# Build a single service
+mvn -pl config-server jib:dockerBuild
+
+# Build and push directly to a registry (no local Docker daemon needed)
+mvn jib:build
+
+# Build to a local tarball (for air-gapped environments)
+mvn jib:buildTar
+```
+
+### Using Jib (or Buildpacks) with Docker Compose
+
+Jib and Buildpacks build images **outside** of Docker Compose — Compose cannot drive their build step. The workflow is always two steps: build first, then run.
+
+**Step 1 — Pre-build all images (run once, or after every code change):**
+
+```bash
+# Using Jib
+mvn jib:dockerBuild
+
+# Or using Spring Boot Buildpacks
+mvn spring-boot:build-image -DskipTests
+```
+
+**Step 2 — Update `docker-compose.yml` to reference pre-built images by name instead of building from a Dockerfile:**
+
+```yaml
+# With Dockerfile (current setup — Compose owns the build)
+config-server:
+  build:
+    context: .
+    dockerfile: config-server/Dockerfile
+
+# With Jib or Buildpacks (Compose only runs, does not build)
+config-server:
+  image: ecommerce/config-server:latest   # must already exist in local daemon
+```
+
+**Step 3 — Run as normal:**
+
+```bash
+docker compose up -d
+# No --build flag needed — Compose just starts the pre-built images
+```
+
+**After a code change:**
+
+```bash
+# Re-build with Jib, then restart the affected service
+mvn -pl config-server jib:dockerBuild
+docker compose up -d config-server        # picks up the newly built image
+```
+
+### Comparing All Three Approaches
+
+| | Dockerfile | `spring-boot:build-image` | Jib |
+|---|---|---|---|
+| File required | Yes | No | No |
+| Customization | Full control | Limited via buildpack config | Good |
+| Build speed | Faster (with layer cache) | Slowest (downloads buildpacks) | **Fastest** (only changed layers) |
+| Image size control | Full control | Least control | Good |
+| Docker daemon required | Yes | Yes | **No** |
+| CI/CD friendly | Yes | OK | **Best** |
+| Compose-driven rebuild | Yes (`--build`) | No — manual Maven step | No — manual Maven step |
+| Best for | Production, fine-tuned images | Quick prototyping | CI/CD pipelines, microservices |
+
+### Which Should You Use?
+
+**Dockerfile** — choose when:
+- You need full control over the runtime environment (custom tools, scripts, OS packages)
+- Your team is already comfortable with Docker
+- You have non-standard build steps
+
+**`spring-boot:build-image`** — choose when:
+- You want zero-config setup and trust Spring Boot's opinionated defaults
+- You are prototyping and don't care about build speed
+
+**Jib** — choose when:
+- You want fast, reproducible builds without a running Docker daemon
+- You are working in a CI/CD pipeline (e.g. GitHub Actions, Jenkins) where no Docker socket is available
+- You want minimal configuration and no Dockerfile maintenance
+
+> **Recommendation for this project:** Jib is the best fit for CI/CD. The existing Dockerfiles are well-written and remain useful for learning and full control — but for everyday rebuilds and CI/CD, Jib's speed and daemon-free operation make it the pragmatic choice.
+
+---
+
+## 9.9 Verify All Images Are Built
+
+Before moving to Docker Compose, confirm all 6 service images are available in your local Docker daemon:
+
+```bash
+docker images | grep ecommerce
+```
+
+Expected output:
+
+```
+REPOSITORY                      TAG       IMAGE ID       CREATED         SIZE
+ecommerce/api-gateway           latest    a1b2c3d4e5f6   2 minutes ago   230MB
+ecommerce/order-service         latest    b2c3d4e5f6a1   3 minutes ago   225MB
+ecommerce/product-service       latest    c3d4e5f6a1b2   4 minutes ago   220MB
+ecommerce/user-service          latest    d4e5f6a1b2c3   5 minutes ago   228MB
+ecommerce/eureka-server         latest    e5f6a1b2c3d4   6 minutes ago   215MB
+ecommerce/config-server         latest    f6a1b2c3d4e5   7 minutes ago   210MB
+```
+
+All 6 images should be present. Each is ~200–230 MB (JRE + JAR only — no Maven, no source code).
+
+> **Note:** MySQL does NOT need to be built — it uses the official `mysql:8.0` image pulled directly from Docker Hub. You do not write a Dockerfile for MySQL.
+
+---
+
+## 9.10 MySQL Init Script
 
 Create `docker/mysql/init.sql` to set up all three databases in a single MySQL container:
 
@@ -695,7 +969,7 @@ CREATE DATABASE IF NOT EXISTS order_db
 
 ---
 
-## 9.8 Docker Compose — Orchestrating the Full Stack
+## 9.11 Docker Compose — Orchestrating the Full Stack
 
 ### The Challenge: `localhost` → Container Names
 
@@ -941,11 +1215,14 @@ Without health checks and `depends_on`, all services would start simultaneously 
 
 ---
 
-## 9.9 Docker Compose Commands
+## 9.12 Docker Compose Commands
 
 ```bash
 # Start all services (build images if not cached)
 docker compose up -d
+# NOTE: Compose only builds an image if it doesn't already exist locally.
+# If your source code changed but the image is already cached, the old image
+# is reused. Always pass --build after a code change.
 
 # Rebuild images before starting (required after code changes)
 docker compose up -d --build
@@ -1003,153 +1280,7 @@ docker compose exec mysql mysql -u root -pRoot123 -e "SHOW DATABASES;"
 
 ---
 
-## 9.10 Spring Boot Maven Plugin — `spring-boot:build-image`
-
-Spring Boot 3.x includes a built-in image builder using **Cloud Native Buildpacks (CNB)**. No Dockerfile required.
-
-### How It Works
-
-```
-mvn spring-boot:build-image
-         │
-         ▼
-Cloud Native Buildpacks
-         │
-         ├─ Detects Java project
-         ├─ Downloads appropriate JRE buildpack
-         ├─ Creates optimized layered image automatically
-         │    Layer 1: JRE runtime
-         │    Layer 2: Spring Boot loader
-         │    Layer 3: Dependencies (changes rarely)
-         │    Layer 4: Application classes (changes often)
-         └─ Pushes to local Docker daemon
-```
-
-### Configuration in `pom.xml`
-
-Add to each service's `pom.xml` (or to the parent `pom.xml` to apply to all):
-
-```xml
-<build>
-    <plugins>
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <configuration>
-                <image>
-                    <!-- Image name: ecommerce/user-service:1.0.0 -->
-                    <name>ecommerce/${project.artifactId}:${project.version}</name>
-                    <!-- Also tag as :latest -->
-                    <tags>
-                        <tag>ecommerce/${project.artifactId}:latest</tag>
-                    </tags>
-                    <!-- JVM settings via environment -->
-                    <env>
-                        <BPL_JVM_THREAD_COUNT>50</BPL_JVM_THREAD_COUNT>
-                    </env>
-                </image>
-            </configuration>
-        </plugin>
-    </plugins>
-</build>
-```
-
-### Building and Running
-
-```bash
-# Build image for user-service (from the project root)
-cd user-service
-mvn spring-boot:build-image -DskipTests
-
-# List the image
-docker images | grep ecommerce
-
-# Run the image
-docker run -d \
-  -p 8081:8081 \
-  -e SPRING_CONFIG_IMPORT=optional:configserver:http://host.docker.internal:8888 \
-  ecommerce/user-service:1.0.0
-
-# Build all services from the root
-mvn spring-boot:build-image -DskipTests
-```
-
-**`host.docker.internal`** — a special DNS name that resolves to the host machine's IP from inside a container. Used when the service needs to connect back to a process running directly on the host.
-
-### Comparison: Dockerfile vs `build-image`
-
-| | Dockerfile | `spring-boot:build-image` |
-|---|---|---|
-| File required | Yes | No |
-| Customization | Full control | Limited via buildpack config |
-| Build time | Faster (with cache) | Slower (downloads buildpacks) |
-| Image optimization | Manual | Automatic layering |
-| Dependency on Docker daemon | Yes (for build) | Yes (to push to local daemon) |
-| Best for | Production, fine-tuned images | Quick prototyping |
-
----
-
-## 9.11 Jib Maven Plugin — Build Without Docker Daemon
-
-**Jib** (from Google) builds OCI-compliant images without needing a running Docker daemon. It builds directly from Maven and pushes to any registry.
-
-### Why Jib?
-
-- **No Docker daemon required** — works in CI environments without Docker socket access
-- **Faster incremental builds** — changes only the layers that differ
-- **Reproducible builds** — same source always produces the same image
-- **No Dockerfile to maintain**
-
-### Configuration in `pom.xml`
-
-```xml
-<plugin>
-    <groupId>com.google.cloud.tools</groupId>
-    <artifactId>jib-maven-plugin</artifactId>
-    <version>3.4.0</version>
-    <configuration>
-        <from>
-            <image>eclipse-temurin:17-jre-alpine</image>
-        </from>
-        <to>
-            <!-- Push to Docker Hub: docker.io/yourusername/user-service:latest -->
-            <image>docker.io/yourusername/user-service</image>
-            <tags>
-                <tag>latest</tag>
-                <tag>${project.version}</tag>
-            </tags>
-        </to>
-        <container>
-            <ports>
-                <port>8081</port>
-            </ports>
-            <jvmFlags>
-                <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
-                <jvmFlag>-XX:MaxRAMPercentage=75.0</jvmFlag>
-                <jvmFlag>-Xms256m</jvmFlag>
-            </jvmFlags>
-            <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-        </container>
-    </configuration>
-</plugin>
-```
-
-### Jib Commands
-
-```bash
-# Build and push directly to registry (no local Docker daemon needed)
-mvn jib:build
-
-# Build and load into local Docker daemon (requires Docker to be running)
-mvn jib:dockerBuild
-
-# Build to a local tarball (for air-gapped environments)
-mvn jib:buildTar
-```
-
----
-
-## 9.12 Package Structure for Docker Files
+## 9.13 Package Structure for Docker Files
 
 After this module, your project root should have:
 
@@ -1178,7 +1309,7 @@ microservices-mini-project/
 
 ---
 
-## 9.13 Common Docker Troubleshooting
+## 9.14 Common Docker Troubleshooting
 
 ### Container exits immediately
 
@@ -1259,7 +1390,7 @@ services:
 
 ---
 
-## 9.14 Module Checkpoint
+## 9.15 Module Checkpoint
 
 ### Step 1 — Build all images
 
