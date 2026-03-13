@@ -2902,14 +2902,12 @@ Authorization layer	Check roles/permissions
             - Vault i.e. Hashicorp vault 
 
         - Property Resolution Order 
-            - command line arguments 
+            - command line arguments        <<-highest
             - system properties 
             - environment variables 
+            - config-server
             - application.properties
             - default properties 
-        
-                   
-
     
 
     ***IMP: Config-Server 
@@ -3659,3 +3657,29 @@ Important properties in the business services that fetch configuration
                 - increase the amount and update the db 
                 - update the logs
         - commit the transaction 
+
+
+
+    **Deployment 
+    -----------------------------
+        - Cloud Providers - AWS, GCP, Azure .... 
+
+        1. Virtual Machine (VM)
+        2. Container 
+
+
+
+        **IMP: Concepts 
+        --------------------
+            **. image: blueprint, a self-contained package including the code + runtime for an applicaiton
+            **. Container: a running instance of an "image" 
+            **. Registry: store the docker images 
+
+
+        **How to build an "image" / "Docker Image" - (Spring based applications)
+        ------------------------------------------------------------------------------
+            1. using Dockerfile 
+
+            2. using Cloud Native Buildpacks (CNB) / Spring Buildpacks 
+
+            3. using Jib Maven Plugin 

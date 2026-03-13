@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,11 +34,13 @@ public class ProductController {
     private Environment environment;
 
     @GetMapping
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<ProductDto>> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
     @GetMapping("/{id}")
+//    @RequestMapping(method = RequestMethod.GET, path = "/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
     	
     	System.out.println("Product Service : Port No - "+ environment.getProperty("server.port"));
@@ -60,6 +63,7 @@ public class ProductController {
     }
 
     @PostMapping
+//    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(dto));
     }

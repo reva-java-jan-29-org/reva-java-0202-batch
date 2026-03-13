@@ -1,0 +1,16 @@
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/security/JwtAuthenticationFilter.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/entity/Role.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/controller/AuthController.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/dto/RegisterRequest.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/dto/LoginRequest.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/entity/User.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/repository/CustomerRepository.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/controller/CustomerController.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/dto/AuthResponse.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/entity/Customer.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/controller/DemoController.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/security/JwtService.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/service/CustomerService.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/config/SecurityConfig.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/UserServiceApplication.java
+/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/user-service/src/main/java/com/ecommerce/MyService.java

@@ -1,0 +1,227 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# E-Commerce Microservices — Docker Compose
+#
+# Startup order (enforced via depends_on + healthchecks):
+#   mysql → config-server → eureka-server
+#        → user-service, product-service, order-service → api-gateway
+#
+# All services communicate via the internal "ecommerce-net" network.
+# Only the API Gateway port (8080) is published to the host machine.
+# Direct access to individual service ports is blocked at the network level.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── MySQL ──────────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Root123
+      MYSQL_ROOT_HOST: "%"         # allow root login from any host (containers)
+    ports:
+      - "3307:3306"                # exposed on 3307 to avoid conflict with local MySQL on 3306
+    volumes:
+      - mysql-data:/var/lib/mysql  # persist data across container restarts
+    networks:
+      - ecommerce-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pRoot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Config Server ──────────────────────────────────────────────────────────
+  config-server:
+    build:
+      context: .                              # build context = project root
+      dockerfile: config-server/Dockerfile
+    image: ecommerce/config-server:latest
+    container_name: config-server
+    environment:
+      # Override the file:// Git URI to use the mounted volume path
+      SPRING_CLOUD_CONFIG_SERVER_GIT_URI: file:///config-repo
+      SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
+      # Eureka — use container name instead of localhost
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_OPTS: "-Xms128m -Xmx256m"
+    volumes:
+      # Mount the local config-repo directory into the container
+      - ./ecommerce-config-repo:/config-repo:ro          # :ro = read-only
+    ports:
+      - "8888:8888"                            # exposed for direct debugging; remove in production
+    networks:
+      - ecommerce-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 40s
+
+  # ── Eureka Server ─────────────────────────────────────────────────────────
+  eureka-server:
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
+    image: ecommerce/eureka-server:latest
+    container_name: eureka-server
+    environment:
+      # Override hostname so Eureka uses its container name for self-registration
+      EUREKA_INSTANCE_HOSTNAME: eureka-server
+      JAVA_OPTS: "-Xms128m -Xmx256m"
+    ports:
+      - "8761:8761"                            # exposed so you can open the dashboard
+    networks:
+      - ecommerce-net
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 40s
+
+  # ── User Service ──────────────────────────────────────────────────────────
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    image: ecommerce/user-service:latest
+    container_name: user-service
+    environment:
+      # Point to Config Server inside Docker network
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888"
+      # Point to Eureka inside Docker network
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      # Override datasource URL — "mysql" is the MySQL container name
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/user_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Root123
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    # No ports: published — only reachable inside ecommerce-net via gateway
+    networks:
+      - ecommerce-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ── Product Service ───────────────────────────────────────────────────────
+  product-service:
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
+    image: ecommerce/product-service:latest
+    container_name: product-service
+    environment:
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/product_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Root123
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    networks:
+      - ecommerce-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ── Order Service ─────────────────────────────────────────────────────────
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    image: ecommerce/order-service:latest
+    container_name: order-service
+    environment:
+      SPRING_CONFIG_IMPORT: "optional:configserver:http://config-server:8888"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/order_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Root123
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    networks:
+      - ecommerce-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  # ── API Gateway ───────────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    image: ecommerce/api-gateway:latest
+    container_name: api-gateway
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+    ports:
+      - "8080:8080"                            # THE ONLY port exposed to the host
+    networks:
+      - ecommerce-net
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+      order-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Named volumes — data persists across "docker compose down" (not "down -v")
+# ─────────────────────────────────────────────────────────────────────────────
+volumes:
+  mysql-data:
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Internal network — containers resolve each other by service name (container_name)
+# ─────────────────────────────────────────────────────────────────────────────
+networks:
+  ecommerce-net:
+    driver: bridge
