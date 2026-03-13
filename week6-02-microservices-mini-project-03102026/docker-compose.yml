@@ -50,7 +50,7 @@ services:
       JAVA_OPTS: "-Xms128m -Xmx256m"
     volumes:
       # Mount the local config-repo directory into the container
-      - ./ecommerce-config-repo:/config-repo:ro          # :ro = read-only
+      - ./ecommerce-config-repo:/config-repo          # :ro = read-only
     ports:
       - "8888:8888"                            # exposed for direct debugging; remove in production
     networks:
