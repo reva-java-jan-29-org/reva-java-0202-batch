@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(mvn compile -q)",
-      "Read(//Users/vishalshah/**)"
+      "Read(//Users/vishalshah/**)",
+      "Bash(brew list:*)",
+      "Read(//opt/homebrew/bin/**)",
+      "Read(//usr/local/bin/**)",
+      "Bash(brew info:*)"
     ],
     "additionalDirectories": [
       "/Users/vishalshah/reva-java-0202-batch/week5-03-spring-web-rest-api-03042026/src/main/java/com/training",

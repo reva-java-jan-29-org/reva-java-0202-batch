@@ -1,0 +1,305 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Jenkinsfile — E-Commerce Microservices CI/CD Pipeline
+//
+// Pipeline stages:
+//   1. Checkout   — pull latest code from GitHub
+//   2. Build      — compile all Maven modules
+//   3. Test       — run unit tests, fail fast on any failure
+//   4. Jib Build  — build Docker images and push to Docker Hub
+//   5. Deploy     — SSH to server and run docker compose up
+//
+// Required Jenkins credentials:
+//   • dockerhub-credentials  (Username + Password)
+//   • github-credentials     (Username + Password, for private repos)
+//   • deploy-server-ssh      (SSH Username + Private Key, for remote deploy)
+// ─────────────────────────────────────────────────────────────────────────────
+
+pipeline {
+
+    // ── Agent ─────────────────────────────────────────────────────────────
+    // 'any' means: run on any available agent (our master doubles as agent)
+    agent any
+
+    // ── Environment Variables ─────────────────────────────────────────────
+    // These are available throughout all stages as $VAR or env.VAR
+    environment {
+        // Docker Hub username — change this to YOUR username
+        DOCKER_HUB_USER    = 'your-dockerhub-username'
+
+        // The 'dockerhub-credentials' ID must match what you created in Jenkins
+        // withCredentials injects DOCKER_HUB_PSW (password) automatically
+        DOCKER_HUB_CREDS   = credentials('dockerhub-credentials')
+
+        // Docker image tag — use the Git commit SHA for traceability
+        // GIT_COMMIT is a built-in Jenkins environment variable
+        IMAGE_TAG          = "${env.GIT_COMMIT?.take(8) ?: 'latest'}"
+
+        // Services to build images for (space-separated)
+        SERVICES           = 'user-service product-service order-service config-server eureka-server api-gateway'
+
+        // Maven options — skip JavaDoc, run in offline mode after first build
+        MAVEN_OPTS         = '-Dmaven.test.failure.ignore=false'
+    }
+
+    // ── Options ──────────────────────────────────────────────────────────
+    options {
+        // Keep only the last 10 builds to save disk space
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+
+        // Fail the build if it runs longer than 30 minutes
+        timeout(time: 30, unit: 'MINUTES')
+
+        // Add timestamps to every console log line
+        timestamps()
+
+        // Color the console output (requires AnsiColor plugin)
+        ansiColor('xterm')
+
+        // Do not run concurrent builds of the same pipeline
+        disableConcurrentBuilds()
+    }
+
+    // ── Triggers ─────────────────────────────────────────────────────────
+    triggers {
+        // Poll GitHub every 5 minutes as a fallback if webhooks are not set up
+        // Format: cron — M H DOM MON DOW
+        // 'H/5 * * * *' = every 5 minutes (H adds jitter to spread load)
+        pollSCM('H/5 * * * *')
+
+        // Primary trigger: GitHub webhook (configured separately, see Section 12.8)
+        // When webhook fires, Jenkins receives a POST to /github-webhook/
+        githubPush()
+    }
+
+    // ── Stages ────────────────────────────────────────────────────────────
+    stages {
+
+        // ── Stage 1: Checkout ─────────────────────────────────────────────
+        stage('Checkout') {
+            steps {
+                echo '═══════════════════════════════════'
+                echo ' STAGE 1 — Checkout Source Code'
+                echo '═══════════════════════════════════'
+
+                // checkout scm = checkout from the SCM (Source Control Management)
+                // configured on the Jenkins pipeline job itself
+                // Jenkins automatically uses the branch that triggered the build
+                checkout scm
+
+                // Print info about what we just checked out
+                sh '''
+                    echo "Branch    : $GIT_BRANCH"
+                    echo "Commit    : $GIT_COMMIT"
+                    echo "Author    : $GIT_AUTHOR_NAME"
+                    echo "Workspace : $WORKSPACE"
+                    echo ""
+                    echo "Project structure:"
+                    ls -la
+                '''
+            }
+        }
+
+        // ── Stage 2: Build ────────────────────────────────────────────────
+        stage('Build') {
+            steps {
+                echo '═══════════════════════════════════'
+                echo ' STAGE 2 — Maven Build'
+                echo '═══════════════════════════════════'
+
+                // Navigate into the project directory
+                // -pl specifies which modules to build
+                // -am = also build dependency modules
+                // -DskipTests = skip tests here; we run them in the next stage
+                sh '''
+                    cd week6-02-microservices-mini-project-03102026
+                    mvn clean compile \
+                        -DskipTests \
+                        --batch-mode \
+                        --no-transfer-progress
+                '''
+                // --batch-mode     = no interactive prompts, machine-friendly output
+                // --no-transfer-progress = suppress download progress bars (cleaner logs)
+            }
+        }
+
+        // ── Stage 3: Test ─────────────────────────────────────────────────
+        stage('Test') {
+            steps {
+                echo '═══════════════════════════════════'
+                echo ' STAGE 3 — Unit Tests'
+                echo '═══════════════════════════════════'
+
+                sh '''
+                    cd week6-02-microservices-mini-project-03102026
+                    mvn test \
+                        --batch-mode \
+                        --no-transfer-progress
+                '''
+            }
+
+            // post — runs AFTER this stage, regardless of success/failure
+            post {
+                always {
+                    // Publish JUnit test results so they appear in the Jenkins UI
+                    // Jenkins looks for Surefire XML reports in target/surefire-reports/
+                    junit(
+                        testResults: '**/target/surefire-reports/*.xml',
+                        allowEmptyResults: true
+                    )
+                }
+                failure {
+                    echo '❌ Tests FAILED — check the Test Results tab above'
+                }
+                success {
+                    echo '✅ All tests passed'
+                }
+            }
+        }
+
+        // ── Stage 4: Build & Push Docker Images with Jib ─────────────────
+        stage('Docker Build & Push') {
+            // Only push images when on the main branch (not feature branches)
+            when {
+                branch 'main'
+            }
+
+            steps {
+                echo '═══════════════════════════════════'
+                echo ' STAGE 4 — Jib: Build & Push Images'
+                echo '═══════════════════════════════════'
+
+                // withCredentials injects the Docker Hub password into DOCKER_HUB_CREDS_PSW
+                // and username into DOCKER_HUB_CREDS_USR
+                // These variables exist ONLY inside this block — not logged, not leaked
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        cd week6-02-microservices-mini-project-03102026
+
+                        echo "Building and pushing images tagged: $IMAGE_TAG"
+
+                        # ── Config Server ──────────────────────────────────
+                        echo "→ config-server"
+                        mvn -pl config-server jib:build \
+                            -Djib.to.image="$DOCKER_USER/config-server:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        # ── Eureka Server ──────────────────────────────────
+                        echo "→ eureka-server"
+                        mvn -pl eureka-server jib:build \
+                            -Djib.to.image="$DOCKER_USER/eureka-server:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        # ── User Service ───────────────────────────────────
+                        echo "→ user-service"
+                        mvn -pl user-service jib:build \
+                            -Djib.to.image="$DOCKER_USER/user-service:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        # ── Product Service ────────────────────────────────
+                        echo "→ product-service"
+                        mvn -pl product-service jib:build \
+                            -Djib.to.image="$DOCKER_USER/product-service:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        # ── Order Service ──────────────────────────────────
+                        echo "→ order-service"
+                        mvn -pl order-service jib:build \
+                            -Djib.to.image="$DOCKER_USER/order-service:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        # ── API Gateway ────────────────────────────────────
+                        echo "→ api-gateway"
+                        mvn -pl api-gateway jib:build \
+                            -Djib.to.image="$DOCKER_USER/api-gateway:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        echo "All images pushed successfully!"
+                    '''
+                }
+            }
+        }
+
+        // ── Stage 5: Deploy ───────────────────────────────────────────────
+        stage('Deploy') {
+            // Only deploy when on main branch
+            when {
+                branch 'main'
+            }
+
+            steps {
+                echo '═══════════════════════════════════'
+                echo ' STAGE 5 — Deploy via Docker Compose'
+                echo '═══════════════════════════════════'
+
+                // For local Jenkins (Jenkins and deploy target are the same machine):
+                sh '''
+                    cd week6-02-microservices-mini-project-03102026
+
+                    echo "Pulling latest images from Docker Hub..."
+                    docker compose pull
+
+                    echo "Recreating containers with zero-downtime rolling restart..."
+                    docker compose up -d --remove-orphans
+
+                    echo "Waiting 30 seconds for services to initialize..."
+                    sleep 30
+
+                    echo "Service status:"
+                    docker compose ps
+                '''
+            }
+        }
+
+    }  // end stages
+
+    // ── Post (global) ─────────────────────────────────────────────────────
+    // Runs after ALL stages complete, regardless of outcome
+    post {
+
+        success {
+            echo '╔══════════════════════════════════╗'
+            echo '║  ✅  PIPELINE SUCCEEDED           ║'
+            echo '╚══════════════════════════════════╝'
+        }
+
+        failure {
+            echo '╔══════════════════════════════════╗'
+            echo '║  ❌  PIPELINE FAILED              ║'
+            echo '╚══════════════════════════════════╝'
+        }
+
+        unstable {
+            // Unstable = build compiled but some tests failed
+            echo '⚠️  Pipeline is UNSTABLE (test failures)'
+        }
+
+        always {
+            // Clean up workspace after every build to save disk space
+            // Comment this out if you need to inspect files after a failure
+            cleanWs()
+        }
+    }
+
+}
