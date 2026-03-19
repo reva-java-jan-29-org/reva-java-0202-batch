@@ -1,2 +1,92 @@
+<div>
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-grid-3x3-gap"></i> Products</h2>
+        <span class="text-muted">{{filteredProducts.length}} items found</span>
+    </div>
 
-<h1>This is Products View Section ..Loading products from backend</h1>
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control form-control-lg"
+                       ng-model="searchQuery"
+                       ng-keyup="$event.keyCode === 13 && search()"
+                       placeholder="Search products by name or description...">
+                <button class="btn btn-primary" ng-click="search()">Search</button>
+                <button class="btn btn-outline-secondary" ng-click="clearSearch()" ng-show="searchQuery">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select form-select-lg" ng-model="selectedCategory"
+                    ng-change="filterByCategory(selectedCategory)">
+                <option ng-repeat="cat in categories" ng-value="cat">{{cat}}</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="text-center py-5" ng-show="loading">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3 text-muted">Loading products...</p>
+    </div>
+
+    <!-- No Results -->
+    <div class="text-center py-5" ng-show="!loading && filteredProducts.length === 0">
+        <i class="bi bi-search display-3 text-muted"></i>
+        <p class="mt-3 text-muted fs-5">No products found. Try a different search.</p>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4" ng-show="!loading && filteredProducts.length > 0">
+        <div class="col" ng-repeat="product in filteredProducts">
+            <div class="card h-100 product-card shadow-sm">
+                <div class="product-img-placeholder">
+                    <i class="bi bi-bag display-4 text-muted" ng-show="!product.imageUrl"></i>
+                    <img ng-show="product.imageUrl" ng-src="{{product.imageUrl}}"
+                         alt="{{product.name}}" class="img-fluid">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <span class="badge bg-secondary mb-2 align-self-start">{{product.category}}</span>
+                    <h6 class="card-title fw-bold">{{product.name}}</h6>
+                    <p class="card-text text-muted small flex-grow-1">
+                        {{product.description.length > 80 ? product.description.substring(0,80) + '...' : product.description}}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
+                        <span class="fs-5 fw-bold text-primary">${{product.price | number:2}}</span>
+                        <span class="small" ng-class="product.stock > 0 ? 'text-success' : 'text-danger'">
+                            <i class="bi" ng-class="product.stock > 0 ? 'bi-check-circle' : 'bi-x-circle'"></i>
+                            {{product.stock > 0 ? 'In Stock' : 'Out of Stock'}}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pb-3">
+                    <!-- Customer: Add to Cart -->
+                    <button class="btn btn-primary w-100"
+                            ng-show="!isAdmin()"
+                            ng-click="addToCart(product)"
+                            ng-disabled="product.stock === 0 || addingToCart[product.id]">
+                        <span ng-show="!addingToCart[product.id]">
+                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        </span>
+                        <span ng-show="addingToCart[product.id]">
+                            <span class="spinner-border spinner-border-sm me-1"></span> Adding...
+                        </span>
+                    </button>
+                    <!-- Admin: Edit / Delete -->
+                    <div class="d-flex gap-2" ng-show="isAdmin()">
+                        <a href="#!/admin/products" class="btn btn-outline-primary flex-fill btn-sm">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="#!/admin/products" class="btn btn-outline-danger flex-fill btn-sm">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

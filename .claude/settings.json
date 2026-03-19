@@ -6,7 +6,9 @@
       "Bash(brew list:*)",
       "Read(//opt/homebrew/bin/**)",
       "Read(//usr/local/bin/**)",
-      "Bash(brew info:*)"
+      "Bash(brew info:*)",
+      "Bash(rm \"/Users/vishalshah/reva-java-0202-batch/Exam Notes : Revision/week7-16-mar\")",
+      "Bash(mkdir \"/Users/vishalshah/reva-java-0202-batch/Exam Notes : Revision/week7-16-mar\")"
     ],
     "additionalDirectories": [
       "/Users/vishalshah/reva-java-0202-batch/week5-03-spring-web-rest-api-03042026/src/main/java/com/training",

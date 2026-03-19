@@ -1,0 +1,144 @@
+<div>
+    <h2 class="fw-bold mb-4"><i class="bi bi-cart3"></i> Shopping Cart</h2>
+
+    <!-- Loading -->
+    <div class="text-center py-5" ng-show="loading">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3 text-muted">Loading cart...</p>
+    </div>
+
+    <!-- Empty Cart -->
+    <div class="text-center py-5" ng-show="!loading && (!cart || !cart.items || cart.items.length === 0)">
+        <i class="bi bi-cart-x display-2 text-muted"></i>
+        <h4 class="mt-3 text-muted">Your cart is empty</h4>
+        <a href="#!/products" class="btn btn-primary mt-2"><i class="bi bi-grid"></i> Browse Products</a>
+    </div>
+
+    <!-- Cart Content -->
+    <div ng-show="!loading && cart && cart.items && cart.items.length > 0">
+        <div class="row">
+
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Price</th>
+                                    <th class="text-center" style="min-width:140px">Qty</th>
+                                    <th class="text-end">Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in cart.items">
+                                    <td><strong>{{item.productName}}</strong></td>
+                                    <td class="text-center">${{item.price | number:2}}</td>
+                                    <td class="text-center">
+                                        <div class="input-group input-group-sm" style="width:120px;margin:0 auto;">
+                                            <button class="btn btn-outline-secondary"
+                                                    ng-click="item.quantity = item.quantity - 1; updateQuantity(item)">-</button>
+                                            <input type="number" class="form-control text-center"
+                                                   ng-model="item.quantity" min="1">
+                                            <button class="btn btn-outline-secondary"
+                                                    ng-click="item.quantity = item.quantity + 1; updateQuantity(item)">+</button>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-semibold">${{item.subtotal | number:2}}</td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-outline-danger" ng-click="removeItem(item.id)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary + Checkout -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0 fw-bold">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Items ({{cart.items.length}})</span>
+                            <span>${{cart.totalAmount | number:2}}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Shipping</span>
+                            <span class="text-success fw-semibold">Free</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold fs-5 mb-3">
+                            <span>Total</span>
+                            <span class="text-primary">${{cart.totalAmount | number:2}}</span>
+                        </div>
+
+                        <button class="btn btn-success w-100" ng-click="proceedToCheckout()" ng-show="!showCheckout">
+                            <i class="bi bi-credit-card"></i> Proceed to Checkout
+                        </button>
+
+                        <!-- Checkout Form -->
+                        <div ng-show="showCheckout">
+                            <hr>
+
+                            <!-- Shipping Address -->
+                            <h6 class="fw-bold mb-2"><i class="bi bi-geo-alt"></i> Shipping Address</h6>
+                            <textarea class="form-control mb-3" rows="2"
+                                      ng-model="shippingAddress"
+                                      placeholder="Enter full shipping address..."></textarea>
+
+                            <!-- Payment Card -->
+                            <h6 class="fw-bold mb-2"><i class="bi bi-credit-card-2-front"></i> Payment Details</h6>
+                            <div class="mb-2">
+                                <p class="text-muted small mb-1">
+                                    <i class="bi bi-info-circle"></i>
+                                    Use test card <code>4242 4242 4242 4242</code> (success)
+                                    or <code>4000 0000 0000 0002</code> (declined).
+                                </p>
+                            </div>
+                            <input type="text" class="form-control mb-2"
+                                   ng-model="cardHolderName"
+                                   placeholder="Cardholder name" maxlength="60">
+                            <input type="text" class="form-control mb-2"
+                                   ng-model="cardNumber"
+                                   placeholder="Card number (16 digits)" maxlength="19">
+                            <div class="row g-2 mb-3">
+                                <div class="col-7">
+                                    <input type="text" class="form-control"
+                                           ng-model="cardExpiry"
+                                           placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="col-5">
+                                    <input type="text" class="form-control"
+                                           ng-model="cardCvv"
+                                           placeholder="CVV" maxlength="4">
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary w-100"
+                                    ng-click="placeOrder()"
+                                    ng-disabled="placingOrder || !shippingAddress.trim() || !cardNumber || !cardExpiry || !cardCvv">
+                                <span ng-show="!placingOrder">
+                                    <i class="bi bi-bag-check"></i> Place Order &amp; Pay
+                                </span>
+                                <span ng-show="placingOrder">
+                                    <span class="spinner-border spinner-border-sm me-1"></span> Processing...
+                                </span>
+                            </button>
+                            <button class="btn btn-outline-secondary w-100 mt-2"
+                                    ng-click="showCheckout = false">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

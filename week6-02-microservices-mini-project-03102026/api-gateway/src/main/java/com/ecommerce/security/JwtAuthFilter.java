@@ -54,15 +54,17 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return onError(exchange, HttpStatus.UNAUTHORIZED);
         }
 
-        // Extract user info and add to headers
+        // Extract user info and forward as headers to downstream services
         System.out.println("Now the token is valid....");
         Claims claims = jwtUtil.extractAllClaims(token);
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
+        String role = claims.get("role", String.class);   // e.g. "ROLE_ADMIN" or "ROLE_CUSTOMER"
 
         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
                 .header("X-User-Id", userId != null ? userId.toString() : "")
                 .header("X-Username", username != null ? username : "")
+                .header("X-User-Role", role != null ? role : "")
                 .build();
         
         

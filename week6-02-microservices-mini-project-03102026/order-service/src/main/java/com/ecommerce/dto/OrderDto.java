@@ -15,4 +15,5 @@ public class OrderDto {
     private String status;
     private String shippingAddress;
     private LocalDateTime createdAt;
+    private PaymentResponse payment;  // attached after payment is processed
 }

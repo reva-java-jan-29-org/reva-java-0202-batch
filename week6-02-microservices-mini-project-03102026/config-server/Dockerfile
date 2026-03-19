@@ -17,6 +17,7 @@ COPY api-gateway/pom.xml      api-gateway/
 COPY user-service/pom.xml     user-service/
 COPY product-service/pom.xml  product-service/
 COPY order-service/pom.xml    order-service/
+COPY payment-service/pom.xml  payment-service/
 
 # Download all dependencies declared in POMs (cached layer — skips on re-builds
 # when only source code changed but POMs are unchanged)

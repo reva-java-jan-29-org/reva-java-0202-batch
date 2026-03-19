@@ -1,442 +1,240 @@
 {
   "info": {
-    "name": "E-Commerce Microservices",
-    "description": "API collection for the e-commerce microservices project.\n\nBase URL: {{baseUrl}} (default: http://localhost:8080)\n\nUsage:\n1. Run 'Auth / Register' to create an account.\n2. Run 'Auth / Login' — the token is saved automatically to {{token}}.\n3. All protected requests use {{token}} via the collection-level Bearer Auth.",
+    "name": "ShopEasy — E-Commerce Microservices",
+    "description": "Complete API collection for ShopEasy microservices.\n\n**Setup:**\n1. Start all services (docker-compose up -d)\n2. Run 'Admin Login' (admin / Admin@123) OR 'Register + Login' as customer\n3. {{token}} is auto-saved — all requests use it via Bearer auth\n\n**Default Admin Credentials:** username=admin, password=Admin@123\n\n**Test Card Numbers:**\n- 4242424242424242  → Payment SUCCESS\n- 4000000000000002  → Card DECLINED\n- 4000000000009995  → Insufficient funds\n- 4000000000000069  → Expired card",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "customerId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "productId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "cartItemId",
-      "value": "1",
-      "type": "string"
-    },
-    {
-      "key": "orderId",
-      "value": "1",
-      "type": "string"
-    }
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "token",   "value": "",                      "type": "string" }
   ],
   "auth": {
     "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "{{token}}",
-        "type": "string"
-      }
-    ]
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
   },
   "item": [
+
     {
-      "name": "Auth",
-      "description": "Public endpoints — no JWT required.",
+      "name": "🔐 Auth",
       "item": [
         {
-          "name": "Register",
+          "name": "Register Customer",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json();",
+            "if (r.token) { pm.collectionVariables.set('token', r.token); pm.collectionVariables.set('userId', r.userId); }"
+          ], "type": "text/javascript" }}],
           "request": {
             "auth": { "type": "noauth" },
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"john_doe\",\n  \"password\": \"secret123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"mobileNumber\": \"9876543210\",\n  \"role\": \"CUSTOMER\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "register"]
-            },
-            "description": "Register a new customer. `role` is optional — defaults to CUSTOMER."
-          },
-          "response": []
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"john_doe\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"mobileNumber\": \"9876543210\"\n}" }
+          }
         },
         {
-          "name": "Login",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var json = pm.response.json();",
-                  "if (json.token) {",
-                  "    pm.collectionVariables.set('token', json.token);",
-                  "    console.log('Token saved:', json.token);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Customer Login",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json();",
+            "if (r.token) { pm.collectionVariables.set('token', r.token); pm.collectionVariables.set('userId', r.userId); }"
+          ], "type": "text/javascript" }}],
           "request": {
             "auth": { "type": "noauth" },
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"username\": \"john_doe\",\n  \"password\": \"secret123\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "auth", "login"]
-            },
-            "description": "Login and receive a JWT. The token is automatically saved to {{token}} for use in all protected requests."
-          },
-          "response": []
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"john_doe\",\n  \"password\": \"password123\"\n}" }
+          }
+        },
+        {
+          "name": "Admin Login",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "var r = pm.response.json();",
+            "if (r.token) { pm.collectionVariables.set('token', r.token); pm.collectionVariables.set('userId', r.userId); }"
+          ], "type": "text/javascript" }}],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\"\n}" }
+          }
         }
       ]
     },
+
     {
-      "name": "Customers",
-      "description": "Customer CRUD — JWT required.",
+      "name": "🛡️ Admin — User Management",
+      "description": "Requires ADMIN token. Run 'Admin Login' first.",
       "item": [
         {
-          "name": "Get All Customers",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/customers",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "customers"]
-            }
-          },
-          "response": []
+          "name": "List All Customers",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/customers" }
         },
         {
-          "name": "Get Customer by ID",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "customers", "{{customerId}}"]
-            }
-          },
-          "response": []
+          "name": "Disable Customer (id=2)",
+          "request": { "method": "PUT", "url": "{{baseUrl}}/api/admin/customers/2/disable" }
         },
         {
-          "name": "Update Customer",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Smith\",\n  \"mobileNumber\": \"9876543210\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "customers", "{{customerId}}"]
-            }
-          },
-          "response": []
+          "name": "Enable Customer (id=2)",
+          "request": { "method": "PUT", "url": "{{baseUrl}}/api/admin/customers/2/enable" }
         },
         {
-          "name": "Delete Customer",
+          "name": "Delete Customer (id=2)",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/admin/customers/2" }
+        },
+        {
+          "name": "Create Admin Account",
           "request": {
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/customers/{{customerId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "customers", "{{customerId}}"]
-            }
-          },
-          "response": []
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/admin/admins",
+            "body": { "mode": "raw", "raw": "{\n  \"username\": \"admin2\",\n  \"password\": \"Admin@456\",\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Admin\",\n  \"mobileNumber\": \"9000000001\"\n}" }
+          }
+        },
+        {
+          "name": "List All Admins",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/admins" }
+        },
+        {
+          "name": "Delete Admin (id=3)",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/admin/admins/3" }
         }
       ]
     },
+
     {
-      "name": "Products",
-      "description": "GET endpoints are public. POST/PUT/DELETE require JWT.",
+      "name": "📦 Products",
       "item": [
         {
-          "name": "Get All Products",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
-            }
-          },
-          "response": []
+          "name": "Get All Products (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{baseUrl}}/api/products" }
         },
         {
-          "name": "Get Product by ID",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "{{productId}}"]
-            }
-          },
-          "response": []
+          "name": "Get Product by ID (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{baseUrl}}/api/products/1" }
         },
         {
-          "name": "Search Products",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/products/search?q=phone",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "search"],
-              "query": [
-                { "key": "q", "value": "phone" }
-              ]
-            }
-          },
-          "response": []
+          "name": "Search Products (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{baseUrl}}/api/products/search?q=laptop" }
         },
         {
-          "name": "Get Products by Category",
-          "request": {
-            "auth": { "type": "noauth" },
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/products/category/Electronics",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "category", "Electronics"]
-            }
-          },
-          "response": []
+          "name": "Filter by Category (Public)",
+          "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{baseUrl}}/api/products/category/Electronics" }
         },
         {
-          "name": "Create Product",
+          "name": "Create Product (Admin only)",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Wireless Headphones\",\n  \"description\": \"Noise-cancelling over-ear headphones\",\n  \"price\": 149.99,\n  \"stockQuantity\": 50,\n  \"category\": \"Electronics\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
-            }
-          },
-          "response": []
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/products",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Gaming Mouse\",\n  \"description\": \"High-DPI wireless gaming mouse with RGB\",\n  \"price\": 49.99,\n  \"stock\": 100,\n  \"category\": \"Electronics\",\n  \"imageUrl\": \"\"\n}" }
+          }
         },
         {
-          "name": "Update Product",
+          "name": "Update Product (Admin only)",
           "request": {
             "method": "PUT",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Wireless Headphones Pro\",\n  \"description\": \"Noise-cancelling over-ear headphones with mic\",\n  \"price\": 179.99,\n  \"stockQuantity\": 40,\n  \"category\": \"Electronics\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "{{productId}}"]
-            }
-          },
-          "response": []
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/products/1",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Laptop Pro\",\n  \"description\": \"Latest edition with improved battery\",\n  \"price\": 1199.99,\n  \"stock\": 25,\n  \"category\": \"Electronics\"\n}" }
+          }
         },
         {
-          "name": "Delete Product",
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "{{productId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Reduce Stock",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/products/{{productId}}/reduce-stock?quantity=2",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products", "{{productId}}", "reduce-stock"],
-              "query": [
-                { "key": "quantity", "value": "2" }
-              ]
-            }
-          },
-          "response": []
+          "name": "Delete Product (Admin only)",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/products/10" }
         }
       ]
     },
+
     {
-      "name": "Cart",
-      "description": "Cart management — JWT required. X-User-Id is injected by the gateway automatically.",
+      "name": "🛒 Cart",
+      "description": "Requires CUSTOMER token.",
       "item": [
         {
-          "name": "Get Cart",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/cart",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "cart"]
-            }
-          },
-          "response": []
+          "name": "Get My Cart",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/cart" }
         },
         {
-          "name": "Add Item to Cart",
+          "name": "Add to Cart",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": 1,\n  \"quantity\": 2\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/cart/add",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "cart", "add"]
-            }
-          },
-          "response": []
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/cart/add",
+            "body": { "mode": "raw", "raw": "{\n  \"productId\": 1,\n  \"quantity\": 2\n}" }
+          }
         },
         {
-          "name": "Update Cart Item Quantity",
-          "request": {
-            "method": "PUT",
-            "url": {
-              "raw": "{{baseUrl}}/api/cart/items/{{cartItemId}}?quantity=3",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "cart", "items", "{{cartItemId}}"],
-              "query": [
-                { "key": "quantity", "value": "3" }
-              ]
-            }
-          },
-          "response": []
+          "name": "Update Cart Item Qty",
+          "request": { "method": "PUT", "url": "{{baseUrl}}/api/cart/items/1?quantity=3" }
         },
         {
-          "name": "Remove Item from Cart",
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/cart/items/{{cartItemId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "cart", "items", "{{cartItemId}}"]
-            }
-          },
-          "response": []
+          "name": "Remove Cart Item",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/cart/items/1" }
         },
         {
           "name": "Clear Cart",
-          "request": {
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/cart/clear",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "cart", "clear"]
-            }
-          },
-          "response": []
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/api/cart/clear" }
+        },
+        {
+          "name": "Get Customer Cart (Admin only)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/cart/customer/2" }
         }
       ]
     },
+
     {
-      "name": "Orders",
-      "description": "Order management — JWT required. X-User-Id is injected by the gateway automatically.",
+      "name": "📋 Orders",
       "item": [
         {
-          "name": "Place Order",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var json = pm.response.json();",
-                  "if (json.id) {",
-                  "    pm.collectionVariables.set('orderId', json.id);",
-                  "    console.log('Order ID saved:', json.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
+          "name": "Place Order — SUCCESS card",
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"shippingAddress\": \"123 Main Street, Springfield, IL 62701\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders"]
-            },
-            "description": "Places an order from the current cart. The order ID is saved to {{orderId}} automatically."
-          },
-          "response": []
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/orders",
+            "body": { "mode": "raw", "raw": "{\n  \"shippingAddress\": \"123 Main Street, Bangalore, KA 560001\",\n  \"cardNumber\": \"4242424242424242\",\n  \"cardExpiry\": \"12/26\",\n  \"cardCvv\": \"123\",\n  \"cardHolderName\": \"John Doe\"\n}" }
+          }
+        },
+        {
+          "name": "Place Order — DECLINED card",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/orders",
+            "body": { "mode": "raw", "raw": "{\n  \"shippingAddress\": \"123 Main Street, Bangalore, KA 560001\",\n  \"cardNumber\": \"4000000000000002\",\n  \"cardExpiry\": \"12/26\",\n  \"cardCvv\": \"123\",\n  \"cardHolderName\": \"John Doe\"\n}" }
+          }
         },
         {
           "name": "Get My Orders",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/orders",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders"]
-            }
-          },
-          "response": []
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/orders" }
         },
         {
           "name": "Get Order by ID",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/orders/{{orderId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "orders", "{{orderId}}"]
-            }
-          },
-          "response": []
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/orders/1" }
+        },
+        {
+          "name": "Get ALL Orders (Admin only)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/orders/all" }
+        }
+      ]
+    },
+
+    {
+      "name": "💳 Payments",
+      "item": [
+        {
+          "name": "My Payment History",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/payments/my" }
+        },
+        {
+          "name": "Get Payment by Order ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/payments/order/1" }
+        },
+        {
+          "name": "Get ALL Payments (Admin only)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/payments/all" }
         }
       ]
     }
+
   ]
 }

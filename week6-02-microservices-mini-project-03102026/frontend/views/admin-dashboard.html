@@ -1,0 +1,75 @@
+<div>
+    <h2 class="fw-bold mb-4"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center p-3 bg-primary text-white">
+                <i class="bi bi-box-seam display-5 mb-2"></i>
+                <h3 class="fw-bold">{{productCount || 0}}</h3>
+                <p class="mb-0">Products</p>
+                <a href="#!/admin/products" class="btn btn-light btn-sm mt-3">Manage</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center p-3 bg-success text-white">
+                <i class="bi bi-people display-5 mb-2"></i>
+                <h3 class="fw-bold">{{customerCount || 0}}</h3>
+                <p class="mb-0">Customers</p>
+                <a href="#!/admin/customers" class="btn btn-light btn-sm mt-3">Manage</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center p-3 bg-warning text-dark">
+                <i class="bi bi-receipt display-5 mb-2"></i>
+                <h3 class="fw-bold">{{orderCount || 0}}</h3>
+                <p class="mb-0">Orders</p>
+                <a href="#!/admin/orders" class="btn btn-light btn-sm mt-3">View All</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm text-center p-3 bg-info text-white">
+                <i class="bi bi-credit-card display-5 mb-2"></i>
+                <h3 class="fw-bold">{{paymentCount || 0}}</h3>
+                <p class="mb-0">Payments</p>
+                <a href="#!/admin/orders" class="btn btn-light btn-sm mt-3">View</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold"><i class="bi bi-lightning-charge"></i> Quick Actions</div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="#!/admin/products" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add New Product
+                        </a>
+                        <a href="#!/admin/admins" class="btn btn-outline-warning">
+                            <i class="bi bi-shield-plus me-2"></i>Create Admin Account
+                        </a>
+                        <a href="#!/products" class="btn btn-outline-secondary">
+                            <i class="bi bi-shop me-2"></i>Browse Store (as visitor)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold"><i class="bi bi-info-circle"></i> Test Card Numbers</div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Card Number</th><th>Outcome</th></tr></thead>
+                        <tbody>
+                            <tr><td><code>4242 4242 4242 4242</code></td><td><span class="badge bg-success">Success</span></td></tr>
+                            <tr><td><code>4000 0000 0000 0002</code></td><td><span class="badge bg-danger">Declined</span></td></tr>
+                            <tr><td><code>4000 0000 0000 9995</code></td><td><span class="badge bg-danger">Insufficient funds</span></td></tr>
+                            <tr><td><code>4000 0000 0000 0069</code></td><td><span class="badge bg-danger">Expired card</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

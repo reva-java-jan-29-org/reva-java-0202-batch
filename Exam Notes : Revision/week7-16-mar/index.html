@@ -1,0 +1,39 @@
+<!-- Minimal AngularJS app -->
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  
+</head>
+<body>
+
+    <div ng-controller="MainCtrl">
+        <h1 ng-bind="name"></h1>
+        <h3 ng-show="flag">Loading....{{flag}}</h3>
+        <p ng-repeat="course in courseNames"> {{ course }} </p>
+        <button ng-click="hideLoding()">Hide</button>
+
+        <input ng-model="name" />
+    </div>
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+<script>
+
+  angular.module('myApp', [])
+    .controller('MainCtrl', function($scope) {
+      $scope.name = 'AngularJS';
+      $scope.courseNames = ['Core Java','Adv Java','Spring','Html','CSS']
+      $scope.flag = true
+
+      $scope.hideLoding = function(){
+        alert('test')
+        
+        $scope.name = 'AngularJS - Updated';
+      }
+
+     
+      
+    });
+
+</script>
+</html>

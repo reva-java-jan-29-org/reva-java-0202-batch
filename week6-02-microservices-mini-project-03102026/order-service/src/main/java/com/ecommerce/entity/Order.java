@@ -23,7 +23,7 @@ import lombok.Data;
 @Data
 public class Order {
 
-    public enum Status { PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED }
+    public enum Status { PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED, PAYMENT_FAILED }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

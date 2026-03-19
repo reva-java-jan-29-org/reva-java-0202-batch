@@ -1,16 +1,10 @@
 package com.ecommerce.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +14,6 @@ import com.ecommerce.dto.LoginRequest;
 import com.ecommerce.dto.RegisterRequest;
 import com.ecommerce.entity.Customer;
 import com.ecommerce.entity.Role;
-import com.ecommerce.repository.CustomerRepository;
 import com.ecommerce.security.JwtService;
 import com.ecommerce.service.CustomerService;
 
@@ -47,7 +40,7 @@ public class AuthController {
 		Customer customer = new Customer();
 		customer.setUsername(request.username());
 		customer.setPassword(passwordEncoder.encode(request.password()));
-		customer.setRole(request.role() != null ? request.role() : Role.CUSTOMER);
+		customer.setRole(Role.CUSTOMER); // Public registration always creates a CUSTOMER
 		customer.setFirstName(request.firstName());
 		customer.setLastName(request.lastName());
 		customer.setMobileNumber(request.mobileNumber());
@@ -56,7 +49,7 @@ public class AuthController {
 
 		String token = jwtService.generateToken(customer);
 
-		return ResponseEntity.ok(new AuthResponse(token, customer.getUsername(), customer.getRole().name()));
+		return ResponseEntity.ok(new AuthResponse(token, customer.getId(), customer.getUsername(), customer.getFirstName(), customer.getRole().name()));
 	}
 
 	@PostMapping("/login")
@@ -70,6 +63,6 @@ public class AuthController {
 
 		String token = jwtService.generateToken(customer);
 
-		return ResponseEntity.ok(new AuthResponse(token, customer.getUsername(), customer.getRole().name()));
+		return ResponseEntity.ok(new AuthResponse(token, customer.getId(), customer.getUsername(), customer.getFirstName(), customer.getRole().name()));
 	}
 }

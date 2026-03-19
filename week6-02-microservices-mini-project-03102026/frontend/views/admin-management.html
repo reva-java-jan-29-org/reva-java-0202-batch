@@ -1,0 +1,72 @@
+<div>
+    <h2 class="fw-bold mb-4"><i class="bi bi-shield-lock"></i> Admin Account Management</h2>
+
+    <div class="row g-4">
+        <!-- Create Admin Form -->
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold bg-warning text-dark">
+                    <i class="bi bi-person-plus"></i> Create New Admin
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control" ng-model="adminForm.username" placeholder="admin_username">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" ng-model="adminForm.password" placeholder="Min 6 characters">
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" ng-model="adminForm.firstName">
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" ng-model="adminForm.lastName">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="text" class="form-control" ng-model="adminForm.mobileNumber" placeholder="10-digit number">
+                    </div>
+                    <button class="btn btn-warning w-100 fw-bold"
+                            ng-click="createAdmin()"
+                            ng-disabled="!adminForm.username || !adminForm.password || !adminForm.mobileNumber">
+                        <i class="bi bi-shield-plus"></i> Create Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing Admins -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold"><i class="bi bi-shield-check"></i> Existing Admins</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr><th>Username</th><th>Name</th><th>Mobile</th><th class="text-end">Action</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="a in admins">
+                                <td><strong>{{a.username}}</strong></td>
+                                <td>{{a.firstName}} {{a.lastName}}</td>
+                                <td>{{a.mobileNumber}}</td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-danger" ng-click="deleteAdmin(a.id)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr ng-show="admins.length === 0">
+                                <td colspan="4" class="text-center text-muted py-3">No admins found.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

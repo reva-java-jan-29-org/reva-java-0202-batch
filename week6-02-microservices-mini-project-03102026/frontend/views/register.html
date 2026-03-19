@@ -1,0 +1,89 @@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white text-center py-3">
+                <h4 class="mb-0"><i class="bi bi-person-plus"></i> Create Account</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="alert alert-danger" ng-show="error">
+                    <i class="bi bi-exclamation-triangle"></i> {{error}}
+                </div>
+
+                <form name="registerForm" ng-submit="register()" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control"
+                                   ng-model="registerData.username"
+                                   placeholder="Choose a username (3–50 characters)"
+                                   required minlength="3" maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <input type="text" class="form-control"
+                                   ng-model="registerData.firstName"
+                                   placeholder="John">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <input type="text" class="form-control"
+                                   ng-model="registerData.lastName"
+                                   placeholder="Doe">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mobile Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-phone"></i></span>
+                            <input type="tel" class="form-control"
+                                   ng-model="registerData.mobileNumber"
+                                   placeholder="e.g. 9876543210"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" class="form-control"
+                                   ng-model="registerData.password"
+                                   placeholder="Minimum 6 characters"
+                                   required minlength="6">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                            <input type="password" class="form-control"
+                                   ng-model="registerData.confirmPassword"
+                                   placeholder="Re-enter your password"
+                                   required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2"
+                            ng-disabled="loading || registerForm.$invalid">
+                        <span ng-show="!loading"><i class="bi bi-person-check"></i> Create Account</span>
+                        <span ng-show="loading">
+                            <span class="spinner-border spinner-border-sm me-1"></span> Creating...
+                        </span>
+                    </button>
+                </form>
+
+                <hr>
+                <p class="text-center mb-0">
+                    Already have an account?
+                    <a href="#!/login" class="text-primary fw-semibold">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

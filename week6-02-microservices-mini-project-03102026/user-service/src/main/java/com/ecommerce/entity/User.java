@@ -55,19 +55,24 @@ public class User implements UserDetails {
         return true;  // Simplification: accounts never expire
     }
 
+    // Whether this account is enabled (admins can disable customers)
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean accountEnabled = true;
+
     @Override
     public boolean isAccountNonLocked() {
-        return true;  // Simplification: accounts never get locked
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;  // Simplification: credentials never expire
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;  // Simplification: all accounts are enabled
+        return Boolean.TRUE.equals(accountEnabled);
     }
     
     

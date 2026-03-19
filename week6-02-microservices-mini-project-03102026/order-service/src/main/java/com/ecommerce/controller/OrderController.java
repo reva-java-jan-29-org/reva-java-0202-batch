@@ -25,6 +25,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    /** Place a new order (customer). Includes payment card details. */
     @PostMapping
     public ResponseEntity<?> placeOrder(
             @RequestHeader("X-User-Id") Long userId,
@@ -37,19 +38,35 @@ public class OrderController {
         }
     }
 
+    /** Get current customer's orders. */
     @GetMapping
     public ResponseEntity<List<OrderDto>> getMyOrders(@RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(orderService.getUserOrders(userId));
     }
 
+    /** Get a specific order — only the owning customer or an admin can access. */
     @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderById(
             @RequestHeader("X-User-Id") Long userId,
+            @RequestHeader(value = "X-User-Role", defaultValue = "") String role,
             @PathVariable Long orderId) {
         try {
+            if ("ROLE_ADMIN".equals(role)) {
+                return ResponseEntity.ok(orderService.getOrderByIdAsAdmin(orderId));
+            }
             return ResponseEntity.ok(orderService.getOrderById(orderId, userId));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
         }
+    }
+
+    /** Admin: view all orders across all customers. */
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllOrders(
+            @RequestHeader(value = "X-User-Role", defaultValue = "") String role) {
+        if (!"ROLE_ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Admin access required"));
+        }
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 }

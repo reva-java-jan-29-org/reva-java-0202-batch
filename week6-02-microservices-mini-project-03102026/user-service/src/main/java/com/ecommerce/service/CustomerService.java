@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.entity.Customer;
+import com.ecommerce.entity.Role;
 import com.ecommerce.repository.CustomerRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +31,16 @@ public class CustomerService implements UserDetailsService {
 		return customerRepository.findAll();
 	}
 
+	/** Returns only CUSTOMER-role accounts (used by admin to manage customers). */
+	public List<Customer> findAllCustomers() {
+		return customerRepository.findByRole(Role.CUSTOMER);
+	}
+
+	/** Returns only ADMIN-role accounts. */
+	public List<Customer> findAllAdmins() {
+		return customerRepository.findByRole(Role.ADMIN);
+	}
+
 	public Customer findById(Long id) {
 		return customerRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Customer not found: " + id));
@@ -42,13 +53,33 @@ public class CustomerService implements UserDetailsService {
 	public void deleteById(Long id) {
 		customerRepository.deleteById(id);
 	}
-	
+
 	public boolean existsByUsername(String username) {
 		return customerRepository.existsByUsername(username);
 	}
-	
-	public Optional<Customer> findByUsername(String username){
+
+	public boolean existsByMobileNumber(String mobileNumber) {
+		return customerRepository.existsByMobileNumber(mobileNumber);
+	}
+
+	public Optional<Customer> findByUsername(String username) {
 		return customerRepository.findByUsername(username);
 	}
 
+	/** Disables a customer account so they cannot log in. */
+	public Customer disableCustomer(Long id) {
+		Customer customer = findById(id);
+		if (customer.getRole() == Role.ADMIN) {
+			throw new RuntimeException("Cannot disable an admin account via this endpoint");
+		}
+		customer.setAccountEnabled(false);
+		return customerRepository.save(customer);
+	}
+
+	/** Re-enables a previously disabled customer account. */
+	public Customer enableCustomer(Long id) {
+		Customer customer = findById(id);
+		customer.setAccountEnabled(true);
+		return customerRepository.save(customer);
+	}
 }
