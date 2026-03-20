@@ -84,18 +84,22 @@ pipeline {
                 // This avoids downloading the full git history and large cached
                 // binary files (jib-cache, compiled classes) that were accidentally
                 // committed, which caused the 10-minute timeout.
-                checkout([
-                    $class: 'GitSCM',
-                    branches: scm.branches,
-                    extensions: [
-                        [$class: 'CloneOption',
-                         depth: 1,
-                         shallow: true,
-                         noTags: true,
-                         timeout: 20]
-                    ],
-                    userRemoteConfigs: scm.userRemoteConfigs
-                ])
+                // retry(3) retries the checkout up to 3 times on transient network errors
+                // (e.g. "Connection reset by peer", "early EOF").
+                retry(3) {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: scm.branches,
+                        extensions: [
+                            [$class: 'CloneOption',
+                             depth: 1,
+                             shallow: true,
+                             noTags: true,
+                             timeout: 20]
+                        ],
+                        userRemoteConfigs: scm.userRemoteConfigs
+                    ])
+                }
 
                 // Print info about what we just checked out
                 sh '''
@@ -271,9 +275,12 @@ pipeline {
         }
 
         always {
-            // Clean up workspace after every build to save disk space
-            // Comment this out if you need to inspect files after a failure
-            deleteDir()
+            // Clean up workspace after every build to save disk space.
+            // Must be wrapped in node{} because if checkout itself fails,
+            // there is no implicit workspace context for deleteDir().
+            node('built-in') {
+                deleteDir()
+            }
         }
     }
 
