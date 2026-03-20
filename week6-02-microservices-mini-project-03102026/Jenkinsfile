@@ -167,120 +167,75 @@ pipeline {
             }
         }
 
-        // ── Stage 4: Build & Push Docker Images with Jib ─────────────────
-        stage('Docker Build & Push') {
-            // Only push images when on the main branch (not feature branches)
-            when {
-                branch 'main'
-            }
-
+        // ── Stage 4: Build Docker Images with Jib ────────────────────────
+        stage('Docker Build') {
             steps {
                 echo '═══════════════════════════════════'
-                echo ' STAGE 4 — Jib: Build & Push Images'
+                echo ' STAGE 4 — Jib: Build Docker Images'
                 echo '═══════════════════════════════════'
 
-                // withCredentials injects the Docker Hub password into DOCKER_HUB_CREDS_PSW
-                // and username into DOCKER_HUB_CREDS_USR
-                // These variables exist ONLY inside this block — not logged, not leaked
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        cd week6-02-microservices-mini-project-03102026
+                // jib:dockerBuild builds images directly into the local Docker daemon.
+                // No Dockerfile needed — Jib assembles the image layers itself.
+                // No registry push/pull required — images are immediately available
+                // for docker compose on this same machine.
+                sh '''
+                    cd week6-02-microservices-mini-project-03102026
 
-                        echo "Building and pushing images tagged: $IMAGE_TAG"
+                    echo "→ config-server"
+                    mvn -pl config-server jib:dockerBuild \
+                        -Djib.to.image="ecommerce/config-server:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── Config Server ──────────────────────────────────
-                        echo "→ config-server"
-                        mvn -pl config-server jib:build \
-                            -Djib.to.image="$DOCKER_USER/config-server:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
+                    echo "→ eureka-server"
+                    mvn -pl eureka-server jib:dockerBuild \
+                        -Djib.to.image="ecommerce/eureka-server:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── Eureka Server ──────────────────────────────────
-                        echo "→ eureka-server"
-                        mvn -pl eureka-server jib:build \
-                            -Djib.to.image="$DOCKER_USER/eureka-server:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
+                    echo "→ user-service"
+                    mvn -pl user-service jib:dockerBuild \
+                        -Djib.to.image="ecommerce/user-service:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── User Service ───────────────────────────────────
-                        echo "→ user-service"
-                        mvn -pl user-service jib:build \
-                            -Djib.to.image="$DOCKER_USER/user-service:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
+                    echo "→ product-service"
+                    mvn -pl product-service jib:dockerBuild \
+                        -Djib.to.image="ecommerce/product-service:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── Product Service ────────────────────────────────
-                        echo "→ product-service"
-                        mvn -pl product-service jib:build \
-                            -Djib.to.image="$DOCKER_USER/product-service:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
+                    echo "→ order-service"
+                    mvn -pl order-service jib:dockerBuild \
+                        -Djib.to.image="ecommerce/order-service:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── Order Service ──────────────────────────────────
-                        echo "→ order-service"
-                        mvn -pl order-service jib:build \
-                            -Djib.to.image="$DOCKER_USER/order-service:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
+                    echo "→ payment-service"
+                    mvn -pl payment-service jib:dockerBuild \
+                        -Djib.to.image="ecommerce/payment-service:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── Payment Service ────────────────────────────────
-                        echo "→ payment-service"
-                        mvn -pl payment-service jib:build \
-                            -Djib.to.image="$DOCKER_USER/payment-service:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
+                    echo "→ api-gateway"
+                    mvn -pl api-gateway jib:dockerBuild \
+                        -Djib.to.image="ecommerce/api-gateway:latest" \
+                        --batch-mode --no-transfer-progress
 
-                        # ── API Gateway ────────────────────────────────────
-                        echo "→ api-gateway"
-                        mvn -pl api-gateway jib:build \
-                            -Djib.to.image="$DOCKER_USER/api-gateway:$IMAGE_TAG" \
-                            -Djib.to.tags="latest" \
-                            -Djib.to.auth.username="$DOCKER_USER" \
-                            -Djib.to.auth.password="$DOCKER_PASS" \
-                            --batch-mode --no-transfer-progress
-
-                        echo "All images pushed successfully!"
-                    '''
-                }
+                    echo "All images built successfully!"
+                    docker images | grep ecommerce
+                '''
             }
         }
 
         // ── Stage 5: Deploy ───────────────────────────────────────────────
         stage('Deploy') {
-            // Only deploy when on main branch
-            when {
-                branch 'main'
-            }
-
             steps {
                 echo '═══════════════════════════════════'
                 echo ' STAGE 5 — Deploy via Docker Compose'
                 echo '═══════════════════════════════════'
 
-                // For local Jenkins (Jenkins and deploy target are the same machine):
+                // Images were already built by Jib in the previous stage into the
+                // local Docker daemon. Just restart containers with the new images.
+                // No --build flag needed — Jib already handled image creation.
                 sh '''
                     cd week6-02-microservices-mini-project-03102026
 
-                    echo "Pulling latest images from Docker Hub..."
-                    docker compose pull
-
-                    echo "Recreating containers with zero-downtime rolling restart..."
+                    echo "Restarting containers with Jib-built images..."
                     docker compose up -d --remove-orphans
 
                     echo "Waiting 30 seconds for services to initialize..."

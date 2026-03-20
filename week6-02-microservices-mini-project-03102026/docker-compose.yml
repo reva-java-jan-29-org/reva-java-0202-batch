@@ -37,9 +37,6 @@ services:
 
   # ── Config Server ──────────────────────────────────────────────────────────
   config-server:
-    build:
-      context: .
-      dockerfile: config-server/Dockerfile
     image: ecommerce/config-server:latest
     container_name: config-server
     environment:
@@ -62,9 +59,6 @@ services:
 
   # ── Eureka Server ──────────────────────────────────────────────────────────
   eureka-server:
-    build:
-      context: .
-      dockerfile: eureka-server/Dockerfile
     image: ecommerce/eureka-server:latest
     container_name: eureka-server
     environment:
@@ -86,9 +80,6 @@ services:
 
   # ── User Service ───────────────────────────────────────────────────────────
   user-service:
-    build:
-      context: .
-      dockerfile: user-service/Dockerfile
     image: ecommerce/user-service:latest
     container_name: user-service
     environment:
@@ -117,9 +108,6 @@ services:
 
   # ── Product Service ────────────────────────────────────────────────────────
   product-service:
-    build:
-      context: .
-      dockerfile: product-service/Dockerfile
     image: ecommerce/product-service:latest
     container_name: product-service
     environment:
@@ -148,9 +136,6 @@ services:
 
   # ── Payment Service ────────────────────────────────────────────────────────
   payment-service:
-    build:
-      context: .
-      dockerfile: payment-service/Dockerfile
     image: ecommerce/payment-service:latest
     container_name: payment-service
     environment:
@@ -179,9 +164,6 @@ services:
 
   # ── Order Service ──────────────────────────────────────────────────────────
   order-service:
-    build:
-      context: .
-      dockerfile: order-service/Dockerfile
     image: ecommerce/order-service:latest
     container_name: order-service
     environment:
@@ -213,9 +195,6 @@ services:
       start_period: 300s
 
   order-service-1:
-    build:
-      context: .
-      dockerfile: order-service/Dockerfile
     image: ecommerce/order-service:latest
     container_name: order-service-1
     environment:
@@ -248,9 +227,6 @@ services:
 
   # ── API Gateway ────────────────────────────────────────────────────────────
   api-gateway:
-    build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
     image: ecommerce/api-gateway:latest
     container_name: api-gateway
     environment:
