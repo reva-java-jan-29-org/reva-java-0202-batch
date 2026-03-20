@@ -1,4 +1,0 @@
-com/ecommerce/security/JwtService.class
-com/ecommerce/security/JwtAuthFilter.class
-com/ecommerce/ApiGatewayApplication.class
-com/ecommerce/security/SecurityConfig.class

@@ -1,8 +1,0 @@
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/controller/ProductController.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/dto/ProductDto.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/entity/Product.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/config/SecurityConfig.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/repository/ProductRepository.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/service/ProductService.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/config/DataInitializer.java
-/Users/vishalshah/reva-java-0202-batch/week6-02-microservices-mini-project-03102026/product-service/src/main/java/com/ecommerce/ProductServiceApplication.java
