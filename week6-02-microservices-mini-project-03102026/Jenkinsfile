@@ -71,10 +71,22 @@ pipeline {
                 echo ' STAGE 1 — Checkout Source Code'
                 echo '═══════════════════════════════════'
 
-                // checkout scm = checkout from the SCM (Source Control Management)
-                // configured on the Jenkins pipeline job itself
-                // Jenkins automatically uses the branch that triggered the build
-                checkout scm
+                // Shallow clone (depth=1) — fetches only the latest commit.
+                // This avoids downloading the full git history and large cached
+                // binary files (jib-cache, compiled classes) that were accidentally
+                // committed, which caused the 10-minute timeout.
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    extensions: [
+                        [$class: 'CloneOption',
+                         depth: 1,
+                         shallow: true,
+                         noTags: true,
+                         timeout: 20]
+                    ],
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
 
                 // Print info about what we just checked out
                 sh '''
