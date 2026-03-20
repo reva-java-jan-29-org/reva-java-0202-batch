@@ -20,6 +20,15 @@ pipeline {
     // 'any' means: run on any available agent (our master doubles as agent)
     agent any
 
+    // ── Tools ─────────────────────────────────────────────────────────────
+    // Tells Jenkins to add Maven and JDK to the PATH for all shell steps.
+    // The names here must match what is configured in:
+    //   Jenkins → Manage Jenkins → Tools → Maven / JDK installations
+    tools {
+        maven 'Maven'   // change 'Maven' to the exact name you used in Jenkins Tools
+        jdk   'JDK17'   // change 'JDK17' to the exact name you used in Jenkins Tools
+    }
+
     // ── Environment Variables ─────────────────────────────────────────────
     // These are available throughout all stages as $VAR or env.VAR
     environment {
