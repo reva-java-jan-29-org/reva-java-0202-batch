@@ -318,7 +318,7 @@ pipeline {
         always {
             // Clean up workspace after every build to save disk space
             // Comment this out if you need to inspect files after a failure
-            cleanWs()
+            deleteDir()
         }
     }
 
