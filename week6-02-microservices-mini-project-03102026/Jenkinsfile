@@ -24,7 +24,7 @@ pipeline {
     // These are available throughout all stages as $VAR or env.VAR
     environment {
         // Docker Hub username — change this to YOUR username
-        DOCKER_HUB_USER    = 'your-dockerhub-username'
+        DOCKER_HUB_USER    = 'suhvishal@gmail.com'
 
         // The 'dockerhub-credentials' ID must match what you created in Jenkins
         // withCredentials injects DOCKER_HUB_PSW (password) automatically
@@ -35,7 +35,7 @@ pipeline {
         IMAGE_TAG          = "${env.GIT_COMMIT?.take(8) ?: 'latest'}"
 
         // Services to build images for (space-separated)
-        SERVICES           = 'user-service product-service order-service config-server eureka-server api-gateway'
+        SERVICES           = 'user-service product-service order-service payment-service config-server eureka-server api-gateway'
 
         // Maven options — skip JavaDoc, run in offline mode after first build
         MAVEN_OPTS         = '-Dmaven.test.failure.ignore=false'
@@ -49,9 +49,6 @@ pipeline {
         // Fail the build if it runs longer than 30 minutes
         timeout(time: 30, unit: 'MINUTES')
 
-        // Add timestamps to every console log line
-        timestamps()
-
         // Color the console output (requires AnsiColor plugin)
         ansiColor('xterm')
 
@@ -60,16 +57,9 @@ pipeline {
     }
 
     // ── Triggers ─────────────────────────────────────────────────────────
-    triggers {
-        // Poll GitHub every 5 minutes as a fallback if webhooks are not set up
-        // Format: cron — M H DOM MON DOW
-        // 'H/5 * * * *' = every 5 minutes (H adds jitter to spread load)
-        pollSCM('H/5 * * * *')
-
-        // Primary trigger: GitHub webhook (configured separately, see Section 12.8)
-        // When webhook fires, Jenkins receives a POST to /github-webhook/
-        githubPush()
-    }
+    // No automatic triggers — trigger builds manually via "Build Now" in Jenkins.
+    // (No separate GitHub repo is set up for this project, so pollSCM/githubPush
+    //  are not applicable here.)
 
     // ── Stages ────────────────────────────────────────────────────────────
     stages {
@@ -221,6 +211,15 @@ pipeline {
                         echo "→ order-service"
                         mvn -pl order-service jib:build \
                             -Djib.to.image="$DOCKER_USER/order-service:$IMAGE_TAG" \
+                            -Djib.to.tags="latest" \
+                            -Djib.to.auth.username="$DOCKER_USER" \
+                            -Djib.to.auth.password="$DOCKER_PASS" \
+                            --batch-mode --no-transfer-progress
+
+                        # ── Payment Service ────────────────────────────────
+                        echo "→ payment-service"
+                        mvn -pl payment-service jib:build \
+                            -Djib.to.image="$DOCKER_USER/payment-service:$IMAGE_TAG" \
                             -Djib.to.tags="latest" \
                             -Djib.to.auth.username="$DOCKER_USER" \
                             -Djib.to.auth.password="$DOCKER_PASS" \
