@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Directive — highlight</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 660px; margin: 40px auto; padding: 20px; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #dc2626; margin-bottom: 8px; }
+    input[type=text] { padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 4px; }
+    button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
+             background: #dc2626; color: white; font-size: 0.9em; margin: 4px 2px; }
+    button:hover { background: #b91c1c; }
+    code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; font-family: monospace; }
+    pre  { background: #1e293b; color: #e2e8f0; padding: 16px; border-radius: 8px; font-size: 0.85em; overflow-x: auto; line-height: 1.6; }
+
+    /* The directive applies this class */
+    .highlighted { color: blue; font-weight: bold; background-color: yellow; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>Custom Directive — <code>highlight</code></h2>
+
+  <!-- ─── 1. As an Attribute ─────────────────────────────────── -->
+  <div class="card">
+    <h3>1. Used as an attribute</h3>
+    <p highlight>This entire paragraph is highlighted using the <code>highlight</code> attribute directive.</p>
+    <p>This paragraph has no directive — normal text.</p>
+  </div>
+
+  <!-- ─── 2. As an Element ──────────────────────────────────── -->
+  <div class="card">
+    <h3>2. Used as an element</h3>
+    <highlight>Custom element tag — also highlighted red!</highlight>
+    <p style="margin-top:10px;">Regular paragraph beside it.</p>
+  </div>
+
+  <!-- ─── 3. Dynamic color via attribute value ─────────────── -->
+  <div class="card">
+    <h3>3. Dynamic color (passing a value into the directive)</h3>
+    <input type="text" ng-model="pickedColor" placeholder="Type a CSS color (e.g. blue, #ff6600)">
+    <p style="margin-top:10px;" highlight-color="{{ pickedColor || 'red' }}">
+      This text color is driven by the attribute value: <strong>{{ pickedColor || 'red' }}</strong>
+    </p>
+  </div>
+
+  <!-- ─── 4. Interactive list ───────────────────────────────── -->
+  <div class="card">
+    <h3>4. Highlight items in a list</h3>
+    <ul style="padding-left:18px;">
+      <li ng-repeat="item in items">
+        <span ng-if="item.important" highlight>{{ item.name }} ★</span>
+        <span ng-if="!item.important">{{ item.name }}</span>
+      </li>
+    </ul>
+    <p style="font-size:0.85em; color:#64748b;">
+      Items marked <code>important: true</code> get the <code>highlight</code> directive applied.
+    </p>
+  </div>
+
+  <!-- ─── Source code explanation ──────────────────────────── -->
+  <div class="card" style="background:#f8fafc;">
+    <h3>How the directives are defined</h3>
+    <pre>
+// 1. Attribute / Element directive — adds .highlighted class
+app.directive('highlight', function() {
+  return {
+    restrict: 'AE',          // A = attribute, E = element
+    link: function(scope, element) {
+      element.addClass('highlighted');
+    }
+  };
+});
+
+// 2. Attribute directive that reads its own value for color
+app.directive('highlightColor', function() {
+  return {
+    restrict: 'A',
+    link: function(scope, element, attrs) {
+      attrs.$observe('highlightColor', function(color) {
+        element.css('color', color || 'blue');
+        element.css('font-weight', 'bold');
+      });
+    }
+  };
+});
+
+/* CSS applied by directive 1 */
+.highlighted { color: red; font-weight: bold; }</pre>
+  </div>
+
+  <script>
+    var app = angular.module('myApp', []);
+
+    /* ── Directive 1: highlight (attribute or element) ── */
+    app.directive('highlight', function() {
+      return {
+        restrict: 'AE',          // works as <highlight> or highlight=""
+        link: function(scope, element) {
+          element.addClass('highlighted');
+        }
+      };
+    });
+
+    /* ── Directive 2: highlight-color (reads attribute value) ── */
+    app.directive('highlightColor', function() {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+          // $observe watches interpolated attribute values ({{ }})
+          attrs.$observe('highlightColor', function(color) {
+            element.css('color', color || 'red');
+            element.css('font-weight', 'bold');
+          });
+        }
+      };
+    });
+
+    /* ── Controller ── */
+    app.controller('DemoCtrl', function($scope) {
+      $scope.pickedColor = '';
+      $scope.items = [
+        { name: 'Angular Directives', important: true  },
+        { name: 'Services',           important: false },
+        { name: 'Two-way binding',    important: true  },
+        { name: 'Filters',            important: false },
+        { name: 'Custom Directives',  important: true  }
+      ];
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-init Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; }
+    .card { background: #f8fafc; border: 1px solid #94a3b8; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #334155; margin-bottom: 8px; }
+    button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
+             background: #475569; color: white; font-size: 0.9em; margin: 3px; }
+    button:hover { background: #334155; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .count-display { font-size: 3em; font-weight: bold; text-align: center; color: #0f172a; margin: 8px 0; }
+    .warn { background: #fef3c7; border: 1px solid #fcd34d; padding: 12px; border-radius: 6px; font-size: 0.9em; }
+    ul li { margin: 6px 0; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-init — Initialize Scope Variables</h2>
+
+  <!-- 1. Inline variable initialization -->
+  <div class="card" ng-init="count = 0; label = 'Clicks'">
+    <h3>1. Inline initialization with ng-init</h3>
+    <div class="count-display">{{ count }}</div>
+    <div style="text-align:center;">
+      <button ng-click="count = count - 1">−</button>
+      <button ng-click="count = count + 1">+</button>
+      <button ng-click="count = 0">Reset</button>
+    </div>
+    <p style="text-align:center; color:#64748b;">
+      <code>ng-init="count = 0; label = 'Clicks'"</code> set both values before any interaction.
+    </p>
+  </div>
+
+  <!-- 2. Initializing arrays/objects -->
+  <div class="card" ng-init="colors = ['Red','Green','Blue']; selected = 'Red'">
+    <h3>2. Initialize an array &amp; iterate</h3>
+    <button ng-repeat="c in colors" ng-click="selected = c"
+            ng-style="{ background: selected === c ? '#0f172a' : '' }">
+      {{ c }}
+    </button>
+    <p>Selected: <strong>{{ selected }}</strong></p>
+  </div>
+
+  <!-- 3. Best-practice note -->
+  <div class="card warn">
+    <h3>⚠️ When to use ng-init</h3>
+    <ul>
+      <li>Use it for <strong>simple, template-level</strong> initialization (e.g., loop aliases, quick defaults).</li>
+      <li>For non-trivial initialization, prefer setting values inside a <strong>controller</strong> function —
+          this keeps business logic out of the template.</li>
+      <li>Common use: <code>ng-init="alias = item"</code> inside <code>ng-repeat</code> to create a
+          local alias for a complex nested object.</li>
+    </ul>
+
+    <p><strong>Controller-based equivalent:</strong></p>
+    <code>$scope.count = 0; $scope.label = 'Clicks';</code>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        // ng-init in the template handles initialization for demo purposes.
+        // In production, prefer initialising here in the controller.
+      });
+  </script>
+</body>
+</html>

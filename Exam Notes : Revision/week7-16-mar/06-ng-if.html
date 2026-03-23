@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-if Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #15803d; margin-bottom: 8px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
+             background: #16a34a; color: white; font-size: 0.95em; margin-right: 8px; }
+    button:hover { background: #15803d; }
+    .alert { padding: 10px 14px; border-radius: 6px; margin-top: 10px; font-weight: bold; }
+    .alert-success { background: #dcfce7; color: #166534; }
+    .alert-danger  { background: #fee2e2; color: #991b1b; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .note { color: #555; font-size: 0.85em; margin-top: 8px; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+
+  <h2>ng-if — Conditionally Add / Remove DOM</h2>
+
+  <!-- 1. Login / Logout toggle -->
+  <div class="card">
+    <h3>1. Login state</h3>
+    <button ng-click="isLoggedIn = !isLoggedIn">
+      {{ isLoggedIn ? 'Logout' : 'Login' }}
+    </button>
+
+    <div ng-if="isLoggedIn" class="alert alert-success">
+      Welcome back, <strong>{{ username }}</strong>! You are logged in.
+    </div>
+
+    <div ng-if="!isLoggedIn" class="alert alert-danger">
+      You are not logged in. Please log in to continue.
+    </div>
+  </div>
+
+  <!-- 2. Role-based rendering -->
+  <div class="card">
+    <h3>2. Role-based content</h3>
+    <label><strong>Role:</strong></label>
+    <select ng-model="role">
+      <option value="admin">Admin</option>
+      <option value="editor">Editor</option>
+      <option value="viewer">Viewer</option>
+    </select>
+
+    <div ng-if="role === 'admin'" class="alert alert-success" style="margin-top:10px;">
+      Admin panel: Full access to all settings.
+    </div>
+    <div ng-if="role === 'editor'" class="alert" style="background:#fef9c3;color:#713f12;margin-top:10px;">
+      Editor panel: You can create and edit content.
+    </div>
+    <div ng-if="role === 'viewer'" class="alert" style="background:#e0f2fe;color:#075985;margin-top:10px;">
+      Viewer panel: Read-only access.
+    </div>
+
+    <p class="note">
+      <code>ng-if</code> completely <strong>removes</strong> the element from the DOM when false
+      (unlike <code>ng-show</code> which only hides it with CSS).
+    </p>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.isLoggedIn = false;
+        $scope.username   = 'Alice';
+        $scope.role       = 'admin';
+      });
+  </script>
+</body>
+</html>

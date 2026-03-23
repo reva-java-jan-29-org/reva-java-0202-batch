@@ -3683,3 +3683,52 @@ Important properties in the business services that fetch configuration
             2. using Cloud Native Buildpacks (CNB) / Spring Buildpacks 
 
             3. using Jib Maven Plugin 
+
+
+
+
+
+
+ <!-- Minimal AngularJS app -->
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+</head>
+<body ng-controller="MainCtrl">
+  <h1>Hello, {{ name }}!</h1>
+  <image src="{{imageUrl}}" />
+</body>
+<script>
+  angular.module('myApp', [])
+    .controller('MainCtrl', function($scope) {
+      $scope.name = 'AngularJS';
+      $scope.products = [];
+
+      ProductService.getProducts();
+    });
+
+     angular.module('myApp', [])
+        .controller("HelloController,  function($scope, "HelloService"){
+            $scope.imageUrl = "http://someimageurl.jpg"
+        })
+
+
+     angular.module('myApp', [])
+     .service("HelloService", function(){
+            
+        })
+
+
+      angular.module('myApp', [])
+        .directive("HelloDirective", function(){
+            
+        })
+
+
+     angular.module('myApp', [])
+        .filter("HelloFilter", function(){
+            
+        })
+</script>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-repeat Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 660px; margin: 40px auto; padding: 20px; }
+    .card { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #c2410c; margin-bottom: 8px; }
+    ul { padding-left: 20px; }
+    li { margin: 4px 0; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #fed7aa; padding: 8px 12px; text-align: left; }
+    th { background: #ffedd5; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .index-badge { display: inline-block; background: #ea580c; color: white;
+                   border-radius: 50%; width: 20px; height: 20px; text-align: center;
+                   line-height: 20px; font-size: 0.75em; margin-right: 6px; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-repeat — Loop Over Arrays &amp; Objects</h2>
+
+  <!-- 1. Simple array -->
+  <div class="card">
+    <h3>1. Array of strings</h3>
+    <ul>
+      <li ng-repeat="fruit in fruits">
+        <span class="index-badge">{{ $index + 1 }}</span>{{ fruit }}
+        <em ng-if="$first"> ← first</em>
+        <em ng-if="$last"> ← last</em>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 2. Array of objects -->
+  <div class="card">
+    <h3>2. Array of objects</h3>
+    <table>
+      <tr>
+        <th>#</th><th>Name</th><th>Role</th><th>Active?</th>
+      </tr>
+      <tr ng-repeat="user in users">
+        <td>{{ $index + 1 }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ user.active ? 'Yes' : 'No' }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 3. key-value over object -->
+  <div class="card">
+    <h3>3. Key-value iteration over object</h3>
+    <ul>
+      <li ng-repeat="(key, val) in config">
+        <code>{{ key }}</code> → {{ val }}
+      </li>
+    </ul>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.fruits = ['Apple', 'Banana', 'Cherry', 'Date'];
+
+        $scope.users = [
+          { name: 'Alice',   role: 'Admin',    active: true  },
+          { name: 'Bob',     role: 'Editor',   active: false },
+          { name: 'Charlie', role: 'Viewer',   active: true  }
+        ];
+
+        $scope.config = {
+          theme:    'dark',
+          language: 'en',
+          version:  '1.8.2'
+        };
+      });
+  </script>
+</body>
+</html>

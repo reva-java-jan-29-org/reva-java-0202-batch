@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-show / ng-hide Directives</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 640px; margin: 40px auto; padding: 20px; }
+    .card { background: #fdf4ff; border: 1px solid #e879f9; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #a21caf; margin-bottom: 8px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
+             background: #a855f7; color: white; font-size: 0.95em; margin-right: 8px; }
+    button:hover { background: #7e22ce; }
+    .box { padding: 12px; border-radius: 6px; margin-top: 10px; font-weight: bold; }
+    .show-box { background: #f3e8ff; border: 1px solid #c084fc; color: #581c87; }
+    .hide-box { background: #fff1f2; border: 1px solid #fda4af; color: #881337; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #e9d5ff; padding: 8px 12px; font-size: 0.9em; }
+    th { background: #f3e8ff; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-show / ng-hide — Toggle Visibility</h2>
+
+  <!-- 1. Basic toggle -->
+  <div class="card">
+    <h3>1. Toggle a panel</h3>
+    <button ng-click="isVisible = !isVisible">
+      {{ isVisible ? 'Hide' : 'Show' }} Panel
+    </button>
+
+    <div class="box show-box" ng-show="isVisible">
+      This element uses <code>ng-show</code>. It is visible when <code>isVisible = true</code>.
+    </div>
+    <div class="box hide-box" ng-hide="isVisible">
+      This element uses <code>ng-hide</code>. It is visible when <code>isVisible = false</code>.
+    </div>
+  </div>
+
+  <!-- 2. Loading spinner -->
+  <div class="card">
+    <h3>2. Loading spinner simulation</h3>
+    <button ng-click="toggleLoading()">Toggle Loading</button>
+
+    <div class="box show-box" ng-show="loading" style="margin-top:10px;">
+      ⏳ Loading data, please wait...
+    </div>
+    <div class="box" style="background:#dcfce7;border:1px solid #86efac;color:#166534;margin-top:10px;" ng-hide="loading">
+      ✅ Data loaded successfully!
+    </div>
+  </div>
+
+  <!-- 3. Comparison table -->
+  <div class="card">
+    <h3>3. ng-show vs ng-hide vs ng-if</h3>
+    <table>
+      <tr><th>Directive</th><th>DOM Element</th><th>When condition is false</th></tr>
+      <tr><td><code>ng-show</code></td><td>Always present</td><td><code>display:none</code> applied</td></tr>
+      <tr><td><code>ng-hide</code></td><td>Always present</td><td>Element is visible</td></tr>
+      <tr><td><code>ng-if</code></td><td>Removed from DOM</td><td>Not in DOM at all</td></tr>
+    </table>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.isVisible = true;
+        $scope.loading   = true;
+
+        $scope.toggleLoading = function() {
+          $scope.loading = !$scope.loading;
+        };
+      });
+  </script>
+</body>
+</html>

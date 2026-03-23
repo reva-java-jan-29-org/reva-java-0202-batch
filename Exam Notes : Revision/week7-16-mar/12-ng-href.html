@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-href Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; }
+    .card { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #1d4ed8; margin-bottom: 8px; }
+    a  { color: #1d4ed8; text-decoration: underline; }
+    ul { padding-left: 18px; }
+    li { margin: 6px 0; }
+    input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; margin-top: 6px; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .warn { background: #fef9c3; border: 1px solid #fde047; padding: 10px; border-radius: 6px; font-size: 0.9em; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-href — Safe Dynamic Anchor href</h2>
+
+  <!-- 1. Dynamic link list -->
+  <div class="card">
+    <h3>1. Dynamic navigation links</h3>
+    <ul>
+      <li ng-repeat="link in links">
+        <a ng-href="{{ link.url }}" target="_blank">{{ link.label }}</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 2. Search link builder -->
+  <div class="card">
+    <h3>2. Search link builder</h3>
+    <label>Search term:</label>
+    <input type="text" ng-model="query" placeholder="Type a search query">
+    <p style="margin-top:10px;">
+      Generated link:
+      <a ng-href="https://www.google.com/search?q={{ query }}" target="_blank"
+         ng-show="query">
+        Search Google for "{{ query }}"
+      </a>
+      <span ng-hide="query" style="color:#999;">Enter a query above.</span>
+    </p>
+  </div>
+
+  <!-- Why ng-href -->
+  <div class="card warn">
+    <h3>⚠️ Why use ng-href instead of href="{{ }}"?</h3>
+    <p>With <code>href="{{ link }}"</code>, the browser briefly navigates to the literal
+       <code>"{{ link }}"</code> URL before Angular processes the template — potentially causing
+       a broken page load. <code>ng-href</code> defers the binding until Angular has resolved
+       the expression.</p>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.query = '';
+        $scope.links = [
+          { label: 'Angular Docs',    url: 'https://docs.angularjs.org' },
+          { label: 'MDN Web Docs',    url: 'https://developer.mozilla.org' },
+          { label: 'Stack Overflow',  url: 'https://stackoverflow.com' }
+        ];
+      });
+  </script>
+</body>
+</html>

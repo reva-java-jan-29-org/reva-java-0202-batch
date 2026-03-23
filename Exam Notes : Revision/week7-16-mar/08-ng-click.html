@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-click Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .card { background: #fff1f2; border: 1px solid #fda4af; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #be123c; margin-bottom: 8px; }
+    button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;
+             background: #e11d48; color: white; font-size: 0.95em; margin: 4px; }
+    button:hover { background: #9f1239; }
+    .counter { font-size: 2.5em; font-weight: bold; color: #be123c; text-align: center; margin: 8px 0; }
+    .log-box { background: #fff; border: 1px solid #fda4af; border-radius: 4px;
+               padding: 8px; max-height: 120px; overflow-y: auto; font-size: 0.85em; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-click — Click Event Handler</h2>
+
+  <!-- 1. Counter -->
+  <div class="card">
+    <h3>1. Counter</h3>
+    <div class="counter">{{ count }}</div>
+    <div style="text-align:center;">
+      <button ng-click="count = count - 1">− Decrement</button>
+      <button ng-click="count = count + 1">+ Increment</button>
+      <button ng-click="count = 0" style="background:#64748b;">Reset</button>
+    </div>
+  </div>
+
+  <!-- 2. Function call with argument -->
+  <div class="card">
+    <h3>2. Calling a function with arguments</h3>
+    <button ng-click="addItem('Apple')">Add Apple</button>
+    <button ng-click="addItem('Banana')">Add Banana</button>
+    <button ng-click="addItem('Cherry')">Add Cherry</button>
+    <button ng-click="clearItems()" style="background:#64748b;">Clear</button>
+
+    <div class="log-box" style="margin-top:10px;">
+      <div ng-repeat="item in items track by $index">{{ $index + 1 }}. {{ item }}</div>
+      <div ng-if="items.length === 0" style="color:#999;">No items added yet.</div>
+    </div>
+  </div>
+
+  <!-- 3. Inline expression vs function -->
+  <div class="card">
+    <h3>3. Inline expression</h3>
+    <p><code>ng-click</code> accepts both inline expressions and function calls:</p>
+    <button ng-click="toggled = !toggled">Toggle: {{ toggled ? 'ON' : 'OFF' }}</button>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.count   = 0;
+        $scope.items   = [];
+        $scope.toggled = false;
+
+        $scope.addItem = function(item) {
+          $scope.items.push(item);
+        };
+
+        $scope.clearItems = function() {
+          $scope.items = [];
+        };
+      });
+  </script>
+</body>
+</html>

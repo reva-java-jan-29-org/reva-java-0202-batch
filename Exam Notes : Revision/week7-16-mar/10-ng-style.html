@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-style Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; }
+    .card { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #b45309; margin-bottom: 8px; }
+    input[type=range] { width: 100%; }
+    input[type=color]  { width: 48px; height: 32px; border: none; cursor: pointer; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    .preview-box { margin-top: 12px; padding: 20px; border-radius: 8px; text-align: center;
+                   font-weight: bold; transition: all 0.3s; border: 2px solid #ccc; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-style — Dynamic Inline Styles</h2>
+
+  <!-- 1. Text styler -->
+  <div class="card">
+    <h3>1. Interactive text styler</h3>
+
+    <label>Text Color: <input type="color" ng-model="textColor"></label>
+    <label>Background Color: <input type="color" ng-model="bgColor"></label>
+    <label>Font Size: {{ fontSize }}px
+      <input type="range" min="12" max="48" ng-model="fontSize">
+    </label>
+
+    <div class="preview-box"
+         ng-style="{ color: textColor, 'background-color': bgColor, 'font-size': fontSize + 'px' }">
+      Preview Text — ng-style is live!
+    </div>
+  </div>
+
+  <!-- 2. Progress bar -->
+  <div class="card">
+    <h3>2. Dynamic progress bar</h3>
+    <label>Progress: {{ progress }}%
+      <input type="range" min="0" max="100" ng-model="progress">
+    </label>
+    <div style="background:#e5e7eb; border-radius:999px; height:24px; margin-top:8px; overflow:hidden;">
+      <div ng-style="{ width: progress + '%', background: progressColor(), height: '100%',
+                       'border-radius': '999px', transition: 'width 0.3s' }">
+      </div>
+    </div>
+    <p style="text-align:center; margin:4px 0;">{{ progress }}% complete</p>
+  </div>
+
+  <p><code>ng-style</code> accepts a JavaScript object where keys are CSS property names
+     (camelCase or quoted kebab-case) and values are dynamic expressions.</p>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.textColor = '#1e3a5f';
+        $scope.bgColor   = '#dbeafe';
+        $scope.fontSize  = 20;
+        $scope.progress  = 40;
+
+        $scope.progressColor = function() {
+          var p = parseInt($scope.progress);
+          if (p < 33)  return '#ef4444';
+          if (p < 66)  return '#f59e0b';
+          return '#22c55e';
+        };
+      });
+  </script>
+</body>
+</html>

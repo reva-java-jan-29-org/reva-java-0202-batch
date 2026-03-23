@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-controller Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .card { background: #f0fff4; border: 1px solid #86efac; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h2>ng-controller — Attach a Controller to a Scope</h2>
+
+  <!-- Controller A -->
+  <div class="card" ng-controller="GreetCtrl">
+    <strong>GreetCtrl scope:</strong>
+    <p>Name: {{ name }}</p>
+    <p>Message: {{ greet() }}</p>
+  </div>
+
+  <!-- Controller B -->
+  <div class="card" ng-controller="MathCtrl">
+    <strong>MathCtrl scope:</strong>
+    <p>Number: {{ num }}</p>
+    <p>Squared: {{ square() }}</p>
+  </div>
+
+  <p><code>ng-controller</code> links a section of the DOM to a specific controller function.
+     Each controller gets its own <code>$scope</code>.</p>
+
+  <script>
+    var app = angular.module('myApp', []);
+
+    app.controller('GreetCtrl', function($scope) {
+      $scope.name = 'Alice';
+      $scope.greet = function() {
+        return 'Hello, ' + $scope.name + '!';
+      };
+    });
+
+    app.controller('MathCtrl', function($scope) {
+      $scope.num = 7;
+      $scope.square = function() {
+        return $scope.num * $scope.num;
+      };
+    });
+  </script>
+</body>
+</html>

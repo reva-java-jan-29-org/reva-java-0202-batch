@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-disabled Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; }
+    .card { background: #fdf2f8; border: 1px solid #f0abfc; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #a21caf; margin-bottom: 8px; }
+    input[type=text], input[type=email], input[type=password] {
+      padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px;
+      width: 100%; box-sizing: border-box; margin-top: 4px; }
+    button { padding: 8px 18px; border: none; border-radius: 4px; cursor: pointer;
+             background: #a855f7; color: white; font-size: 0.95em; margin-top: 10px; }
+    button:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .status { margin-top: 8px; font-size: 0.9em; color: #7c3aed; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-disabled — Disable Form Elements Conditionally</h2>
+
+  <!-- 1. Simple checkbox control -->
+  <div class="card">
+    <h3>1. Enable / Disable via checkbox</h3>
+    <label>
+      <input type="checkbox" ng-model="isEnabled"> Enable the button
+    </label>
+    <br>
+    <button ng-disabled="!isEnabled" ng-click="clicked()">Click Me</button>
+    <p class="status" ng-show="clickMessage">{{ clickMessage }}</p>
+  </div>
+
+  <!-- 2. Form validation-driven disable -->
+  <div class="card">
+    <h3>2. Submit button disabled until form is valid</h3>
+    <form name="signupForm" novalidate>
+      <label>Name (required):
+        <input type="text" name="name" ng-model="user.name" required>
+      </label>
+      <label>Email (required):
+        <input type="email" name="email" ng-model="user.email" required>
+      </label>
+      <label>Password (min 6 chars):
+        <input type="password" name="pwd" ng-model="user.password" required ng-minlength="6">
+      </label>
+
+      <button type="submit"
+              ng-disabled="signupForm.$invalid"
+              ng-click="submitForm()">
+        Register
+      </button>
+      <p class="status">Form valid: {{ !signupForm.$invalid }}</p>
+      <p class="status" ng-show="submitted" style="color:#16a34a;">✅ Form submitted!</p>
+    </form>
+  </div>
+
+  <p><code>ng-disabled</code> evaluates an expression and adds/removes the native
+     <code>disabled</code> attribute on form controls.</p>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.isEnabled    = false;
+        $scope.clickMessage = '';
+        $scope.user         = {};
+        $scope.submitted    = false;
+
+        $scope.clicked = function() {
+          $scope.clickMessage = 'Button was clicked at ' + new Date().toLocaleTimeString();
+        };
+
+        $scope.submitForm = function() {
+          $scope.submitted = true;
+        };
+      });
+  </script>
+</body>
+</html>

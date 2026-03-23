@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-app Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .card { background: #f0f4ff; border: 1px solid #b0c4ff; border-radius: 8px; padding: 20px; }
+    h2 { color: #2c3e50; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .note { color: #555; font-size: 0.9em; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <h2>ng-app — Bootstrap the AngularJS App</h2>
+
+  <div class="card">
+    <p><strong>Purpose:</strong> Marks the root element of an AngularJS application.
+      Everything inside this element is managed by AngularJS.</p>
+
+    <p>This entire page is bootstrapped with <code>ng-app="myApp"</code> on the <code>&lt;html&gt;</code> tag.</p>
+
+    <!-- Simple expression to prove Angular is active -->
+    <p>AngularJS expression: <strong>{{ 2 + 3 }}</strong> (should show 5)</p>
+    <p>String expression: <strong>{{ "Hello, " + "AngularJS!" }}</strong></p>
+
+    <p class="note">
+      Without <code>ng-app</code>, AngularJS expressions like <code>{{ }}</code> would not be evaluated
+      and would appear as raw text in the browser.
+    </p>
+  </div>
+
+  <script>
+    angular.module('myApp', []);
+  </script>
+</body>
+</html>

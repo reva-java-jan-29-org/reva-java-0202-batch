@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-class Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 640px; margin: 40px auto; padding: 20px; }
+    .card { background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #0369a1; margin-bottom: 8px; }
+    button { padding: 7px 14px; border: none; border-radius: 4px; cursor: pointer;
+             background: #0284c7; color: white; font-size: 0.9em; margin: 4px; }
+    button:hover { background: #0369a1; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+
+    /* Classes applied via ng-class */
+    .active   { background: #0ea5e9 !important; color: white !important; font-weight: bold; }
+    .disabled { opacity: 0.4; pointer-events: none; }
+    .highlight{ background: #fef9c3; border-left: 4px solid #eab308; padding: 8px 12px; }
+    .error    { color: #dc2626; font-weight: bold; }
+    .success  { color: #16a34a; font-weight: bold; }
+
+    /* Tab styles */
+    .tabs { display: flex; gap: 4px; margin-bottom: 0; }
+    .tab-btn { background: #e0f2fe; color: #0369a1; border-radius: 4px 4px 0 0; }
+    .tab-content { border: 1px solid #7dd3fc; border-radius: 0 4px 4px 4px;
+                   padding: 12px; background: white; min-height: 60px; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-class — Dynamic CSS Classes</h2>
+
+  <!-- 1. Object syntax: {className: condition} -->
+  <div class="card">
+    <h3>1. Object syntax — tab switcher</h3>
+    <div class="tabs">
+      <button class="tab-btn" ng-class="{active: tab === 1}" ng-click="tab = 1">Tab 1</button>
+      <button class="tab-btn" ng-class="{active: tab === 2}" ng-click="tab = 2">Tab 2</button>
+      <button class="tab-btn" ng-class="{active: tab === 3}" ng-click="tab = 3">Tab 3</button>
+    </div>
+    <div class="tab-content">
+      <span ng-if="tab === 1">Content for <strong>Tab 1</strong></span>
+      <span ng-if="tab === 2">Content for <strong>Tab 2</strong></span>
+      <span ng-if="tab === 3">Content for <strong>Tab 3</strong></span>
+    </div>
+  </div>
+
+  <!-- 2. Multiple conditions -->
+  <div class="card">
+    <h3>2. Multiple classes based on state</h3>
+    <button ng-click="status = 'success'">Set Success</button>
+    <button ng-click="status = 'error'">Set Error</button>
+    <button ng-click="status = ''" style="background:#64748b;">Clear</button>
+
+    <p ng-class="{success: status === 'success', error: status === 'error', highlight: status !== ''}">
+      Status message: <span ng-if="status">{{ status }}</span><span ng-if="!status">none</span>
+    </p>
+  </div>
+
+  <!-- 3. String / array syntax -->
+  <div class="card">
+    <h3>3. String expression syntax</h3>
+    <p>Current class applied: <code>{{ dynamicClass }}</code></p>
+    <button ng-click="dynamicClass = 'highlight'" >Apply Highlight</button>
+    <button ng-click="dynamicClass = 'error'"     >Apply Error</button>
+    <button ng-click="dynamicClass = 'success'"   >Apply Success</button>
+    <div style="margin-top:8px; padding:10px;" ng-class="dynamicClass">
+      This div gets the class: <strong>{{ dynamicClass }}</strong>
+    </div>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.tab         = 1;
+        $scope.status      = '';
+        $scope.dynamicClass = 'highlight';
+      });
+  </script>
+</body>
+</html>

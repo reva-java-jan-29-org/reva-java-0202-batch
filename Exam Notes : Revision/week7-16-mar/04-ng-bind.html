@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-bind Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; }
+    .card { background: #f5f3ff; border: 1px solid #c4b5fd; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 12px; }
+    th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; font-size: 0.9em; }
+    th { background: #ede9fe; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    .label { font-weight: bold; margin-top: 10px; display: block; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-bind — One-Way Data Binding (text output)</h2>
+
+  <div class="card">
+    <span class="label">Type something:</span>
+    <input type="text" ng-model="message" placeholder="Enter a message">
+
+    <p>Using <code>ng-bind</code>: <span ng-bind="message || 'nothing yet'"></span></p>
+    <p>Using <code>{{ }}</code> interpolation: {{ message || 'nothing yet' }}</p>
+
+    <p>Current time (set on load): <strong ng-bind="loadTime"></strong></p>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr>
+        <th>Feature</th>
+        <th>ng-bind</th>
+        <th>{{ }} interpolation</th>
+      </tr>
+      <tr>
+        <td>Direction</td>
+        <td>One-way (model → view)</td>
+        <td>One-way (model → view)</td>
+      </tr>
+      <tr>
+        <td>Flash of unrendered content</td>
+        <td>No (preferred on initial load)</td>
+        <td>Yes (briefly shows {{ }})</td>
+      </tr>
+      <tr>
+        <td>Usage</td>
+        <td>Attribute on element</td>
+        <td>Inline in text / attributes</td>
+      </tr>
+    </table>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.message  = '';
+        $scope.loadTime = new Date().toLocaleTimeString();
+      });
+  </script>
+</body>
+</html>

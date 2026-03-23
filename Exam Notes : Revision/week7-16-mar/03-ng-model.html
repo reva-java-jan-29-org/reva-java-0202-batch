@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-model Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .card { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    input, select { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; margin-top: 4px; }
+    label { font-weight: bold; display: block; margin-top: 12px; }
+    .output { margin-top: 8px; color: #1d4ed8; font-weight: bold; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-model — Two-Way Data Binding</h2>
+
+  <div class="card">
+    <label>Type your name:</label>
+    <input type="text" ng-model="name" placeholder="Enter name">
+    <p class="output">Hello, {{ name || 'stranger' }}!</p>
+
+    <label>Pick a color:</label>
+    <select ng-model="color">
+      <option value="red">Red</option>
+      <option value="blue">Blue</option>
+      <option value="green">Green</option>
+    </select>
+    <p class="output" style="color: {{ color }}">Selected color: {{ color }}</p>
+
+    <label>Agree to terms?</label>
+    <input type="checkbox" ng-model="agreed">
+    <p class="output">Agreed: {{ agreed }}</p>
+  </div>
+
+  <p><code>ng-model</code> creates a <strong>two-way binding</strong> between the input element and
+     the <code>$scope</code> variable. Changes in the input immediately update the model and vice versa.</p>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.name  = '';
+        $scope.color = 'blue';
+        $scope.agreed = false;
+      });
+  </script>
+</body>
+</html>

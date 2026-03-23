@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+  <meta charset="UTF-8">
+  <title>ng-submit Directive</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 620px; margin: 40px auto; padding: 20px; }
+    .card { background: #fff7ed; border: 1px solid #fdba74; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    h2 { color: #2c3e50; }
+    h3 { color: #c2410c; margin-bottom: 8px; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input[type=text], input[type=email], textarea {
+      padding: 7px 10px; border: 1px solid #ccc; border-radius: 4px;
+      width: 100%; box-sizing: border-box; margin-top: 4px; }
+    textarea { height: 80px; resize: vertical; }
+    button { padding: 8px 18px; border: none; border-radius: 4px; cursor: pointer;
+             background: #ea580c; color: white; font-size: 0.95em; margin-top: 12px; }
+    button:hover { background: #c2410c; }
+    button:disabled { background: #d1d5db; color: #9ca3af; cursor: not-allowed; }
+    .result-box { background: #dcfce7; border: 1px solid #86efac; border-radius: 6px;
+                  padding: 12px; margin-top: 12px; }
+    .error-msg  { color: #dc2626; font-size: 0.85em; margin-top: 3px; }
+    code { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  </style>
+</head>
+<body ng-controller="DemoCtrl">
+  <h2>ng-submit — Form Submit Handler</h2>
+
+  <!-- 1. Contact form -->
+  <div class="card">
+    <h3>1. Contact Form</h3>
+    <form name="contactForm" ng-submit="submitContact()" novalidate>
+      <label>Name *
+        <input type="text" name="name" ng-model="contact.name" required>
+        <span class="error-msg" ng-show="contactForm.name.$touched && contactForm.name.$invalid">
+          Name is required.
+        </span>
+      </label>
+
+      <label>Email *
+        <input type="email" name="email" ng-model="contact.email" required>
+        <span class="error-msg" ng-show="contactForm.email.$touched && contactForm.email.$invalid">
+          Valid email required.
+        </span>
+      </label>
+
+      <label>Message *
+        <textarea name="msg" ng-model="contact.message" required></textarea>
+        <span class="error-msg" ng-show="contactForm.msg.$touched && contactForm.msg.$invalid">
+          Message is required.
+        </span>
+      </label>
+
+      <button type="submit" ng-disabled="contactForm.$invalid">Send Message</button>
+    </form>
+
+    <div class="result-box" ng-show="submitted">
+      ✅ Message sent!<br>
+      <strong>From:</strong> {{ contact.name }} ({{ contact.email }})<br>
+      <strong>Message:</strong> {{ contact.message }}
+    </div>
+  </div>
+
+  <!-- 2. Key point -->
+  <div class="card" style="background:#f0f9ff; border-color:#7dd3fc;">
+    <h3>How ng-submit differs from ng-click on button</h3>
+    <ul>
+      <li><code>ng-submit</code> is placed on the <code>&lt;form&gt;</code> element and handles
+          <em>all</em> ways the form can be submitted (Enter key, submit button click).</li>
+      <li>It also automatically prevents the default browser form submission (no page reload).</li>
+      <li><code>ng-click</code> on a button only fires on mouse click — Enter key won't trigger it.</li>
+    </ul>
+  </div>
+
+  <script>
+    angular.module('myApp', [])
+      .controller('DemoCtrl', function($scope) {
+        $scope.contact   = {};
+        $scope.submitted = false;
+
+        $scope.submitContact = function() {
+          $scope.submitted = true;
+        };
+      });
+  </script>
+</body>
+</html>
