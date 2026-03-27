@@ -1,0 +1,50 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.testing</groupId>
+	<artifactId>week8-02-selenium-tests-03262026</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>week8-02-selenium-tests-03262026</name>
+
+	<properties>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<selenium.version>4.18.1</selenium.version>
+		<testng.version>7.12.0</testng.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- ── Selenium WebDriver ──────────────────────────────── -->
+		<!-- selenium-java includes all browser bindings + support classes -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>${selenium.version}</version>
+		</dependency>
+
+		<!-- ── TestNG ─────────────────────────────────────────── -->
+		<!-- Test framework: annotations, assertions, test runners -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>${testng.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Surefire plugin runs TestNG tests via mvn test -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

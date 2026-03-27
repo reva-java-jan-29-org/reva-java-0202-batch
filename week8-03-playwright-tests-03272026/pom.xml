@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.testing</groupId>
+	<artifactId>week8-03-playwright-tests-03272026</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>week8-03-playwright-tests-03272026</name>
+	<properties>
+		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<playwright.version>1.43.0</playwright.version>
+		<testng.version>7.9.0</testng.version>
+	</properties>
+
+	<dependencies>
+
+		<!-- ── Playwright for Java ─────────────────────────────────── -->
+		<!-- Includes bundled Node.js server + browser download tooling -->
+		<dependency>
+			<groupId>com.microsoft.playwright</groupId>
+			<artifactId>playwright</artifactId>
+			<version>${playwright.version}</version>
+		</dependency>
+
+		<!-- ── TestNG ─────────────────────────────────────────────── -->
+		<!-- Test framework: annotations, assertions, test runners -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>${testng.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Surefire plugin runs TestNG tests via mvn test -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+			</plugin>
+		</plugins>
+	</build>
+</project>
